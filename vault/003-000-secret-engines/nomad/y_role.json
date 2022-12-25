@@ -1,9 +1,0 @@
-{
-  "plugin_name": "postgres-database-plugin",
-  "allowed_roles": ["ro", "rw"],
-  "max_open_connections": 5,
-  "max_connection_lifetime": "5s",
-  "connection_url": "postgresql://{{username}}:{{password}}@%%_hostport_%%/%%_dbname_%%?sslmode=disable",
-  "username": "%%_uname_%%",
-  "password": "%%_upass_%%"
-}
