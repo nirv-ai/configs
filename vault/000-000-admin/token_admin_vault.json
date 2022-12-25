@@ -1,5 +1,5 @@
 {
-  "policies": ["default", "admin_policy_vault"],
+  "policies": ["default", "policy_admin_vault"],
   "display_name": "role vault admin",
   "no_parent": false,
   "renewable": true,
