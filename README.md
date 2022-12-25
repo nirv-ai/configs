@@ -1,6 +1,6 @@
 # nirvai configs
 
-- [documentation is kept in nirvai/docs repo](https://github.com/nirv-ai/docs/blob/main/README.md)
+- [documentation is kept in nirvai/docs repo](https://github.com/nirv-ai/docs/blob/main/configs/README.md)
 
 ## RACEXP
 
