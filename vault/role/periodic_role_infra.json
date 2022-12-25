@@ -1,5 +1,9 @@
 {
-  "allowed_policies": ["default", "infra"],
+  "allowed_policies": ["default", "periodic_policy_infra"],
+  "display_name": "role periodic infrastructure",
+  "explicit_max_ttl": "7d",
+  "renewable": true,
   "period": "30d",
+  "type": "batch",
   "no_parent": true
 }

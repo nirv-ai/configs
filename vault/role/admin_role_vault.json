@@ -1,6 +1,6 @@
 {
   "policies": ["default", "admin_policy_vault"],
-  "display_name": "role: vault admin",
+  "display_name": "role vault admin",
   "no_parent": false,
   "renewable": true,
   "ttl": "720h",
