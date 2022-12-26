@@ -1,0 +1,13 @@
+{
+  "bind_secret_id": true,
+  "local_secret_ids": "",
+  "secret_id_bound_cidrs": [],
+  "secret_id_num_uses": 0,
+  "secret_id_ttl": "1d",
+  "token_bound_cidrs": [],
+  "token_max_ttl": "30d",
+  "token_period": "",
+  "token_policies": ["default", "policy_bff"],
+  "token_ttl": "1d",
+  "token_type": "service"
+}
