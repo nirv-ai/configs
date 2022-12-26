@@ -1,25 +1,23 @@
-# kv-v2
-path "secret/*" {
-  capabilities = [ "create", "read", "update", "delete", "list", "sudo"]
+path "secret/*" { # kv-v2
+  capabilities = [ "create", "read", "update", "delete", "list", "patch", "sudo"]
 }
 
-# kv-v1
-path "env/*" {
-  capabilities = [ "create", "read", "update", "delete", "list", "sudo"]
+path "env/*" { # kv-v1
+  capabilities = [ "create", "read", "update", "delete", "list", "patch", "sudo"]
 }
 
 path "sys/*" {
-  capabilities = [ "create", "read", "update", "delete", "list", "sudo" ]
+  capabilities = [ "create", "read", "update", "delete", "list", "patch", "sudo" ]
 }
 
 path "auth/*" {
-  capabilities = [ "create", "read", "update", "delete", "list", "sudo" ]
+  capabilities = [ "create", "read", "update", "delete", "list", "patch", "sudo" ]
 }
 
 path "database/*" {
-  capabilities = [ "create", "read", "update", "delete", "list", "sudo" ]
+  capabilities = [ "create", "read", "update", "delete", "list", "patch", "sudo" ]
 }
 
 path "pki*" {
-  capabilities = [ "create", "read", "update", "delete", "list", "sudo" ]
+  capabilities = [ "create", "read", "update", "delete", "list", "patch", "sudo" ]
 }

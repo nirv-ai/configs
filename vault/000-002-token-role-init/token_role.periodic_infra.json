@@ -1,5 +1,5 @@
 {
-  "allowed_policies": ["default", "policy_periodic_infra"],
+  "allowed_policies": ["default", "policy_admin_approle"],
   "display_name": "role periodic infrastructure",
   "explicit_max_ttl": "7d",
   "renewable": true,
