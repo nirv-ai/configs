@@ -3,7 +3,7 @@
 default_lease_ttl = "7d"
 default_max_request_duration = "30s"
 disable_cahe = false
-disable_mlock = false
+disable_mlock = true # we use integrated raft storage
 enable_response_header_hostname = true
 enable_response_header_raft_node_id = true
 log_format= "json"

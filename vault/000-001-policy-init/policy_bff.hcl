@@ -6,7 +6,7 @@ path "secret/data/bff/*" {
   capabilities = [ "read" ]
 }
 
-# get postgres secrets
+# get readonly/readwrite postgres secrets
 path "database/creds/read*" {
   capabilities = ["read"]
 }
