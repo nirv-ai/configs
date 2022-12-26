@@ -1,4 +1,10 @@
+# kv-v2
 path "secret/*" {
+  capabilities = [ "create", "read", "update", "delete", "list", "sudo"]
+}
+
+# kv-v1
+path "env/*" {
   capabilities = [ "create", "read", "update", "delete", "list", "sudo"]
 }
 
