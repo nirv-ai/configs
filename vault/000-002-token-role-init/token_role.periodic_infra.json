@@ -1,8 +1,8 @@
 {
   "allowed_policies": ["default", "policy_admin_approle"],
-  "explicit_max_ttl": "7d",
+  "explicit_max_ttl": "1h",
   "renewable": true,
-  "period": "30d",
-  "type": "batch",
+  "period": "1h",
+  "token_type": "batch",
   "no_parent": true
 }
