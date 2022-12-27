@@ -7,5 +7,5 @@
   "token_max_ttl": "30d",
   "token_policies": ["default", "policy_bff"],
   "token_ttl": "1d",
-  "token_type": "service"
+  "token_type": "batch"
 }
