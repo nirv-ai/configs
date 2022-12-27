@@ -1,6 +1,5 @@
 {
   "policies": ["default"],
-  "display_name": "role reset pw",
   "explicit_max_ttl": "15m",
   "no_parent": true,
   "num_uses": 1,

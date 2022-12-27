@@ -1,6 +1,5 @@
 {
   "allowed_policies": ["default", "policy_admin_ops"],
-  "display_name": "role ops admin",
   "explicit_max_ttl": "7d",
   "no_parent": false,
   "renewable": true,
