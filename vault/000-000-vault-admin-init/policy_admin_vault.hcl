@@ -15,6 +15,10 @@ path "auth/*" {
   capabilities = [ "create", "read", "update", "delete", "list", "patch", "sudo" ]
 }
 
+path "auth/token/root" {
+  capabilities = ["deny"]
+}
+
 path "database/*" {
   capabilities = [ "create", "read", "update", "delete", "list", "patch", "sudo" ]
 }
