@@ -7,8 +7,20 @@
 - [NIRVai configs project board](https://github.com/orgs/nirv-ai/projects/6/views/1?filterQuery=repo%3A%22nirv-ai%2Fconfigs%22)
 - [RACEXP docs](https://github.com/noahehall/theBookOfNoah/blob/master/0current/architectural%20thinking/0racexp.md)
 
-### Vault
+## Vault
 
 - [vault documentation](https://github.com/nirv-ai/docs/tree/main/vault)
 - [vault configuration](./vault)
-- [vault supporting script](https://github.com/nirv-ai/scripts/blob/develop/script.vault.sh)
+- [available scripts](https://github.com/nirv-ai/scripts/tree/develop/vault)
+
+## nomad
+
+- [nomad server config](./nomad/development.server.nomad)
+- [nomad client config](./nomad/development.client.nomad)
+- [available scripts](https://github.com/nirv-ai/scripts/tree/develop/nomad)
+- [reference development job spec used in nirv-core](./nomad/development.dev_core.nomad)
+
+## haproxy
+
+- [haproxy community modules](./haproxy/modules/)
+- [reference development config used in nirv-core](./haproxy/haproxy.cfg)
