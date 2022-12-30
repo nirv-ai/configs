@@ -1,29 +1,14 @@
-# @see https://developer.hashicorp.com/nomad/docs/configuration
-# @see https://developer.hashicorp.com/nomad/docs/configuration/server
-# @see https://developer.hashicorp.com/nomad/docs/drivers/docker
-# @see https://developer.hashicorp.com/nomad/tutorials/transport-security/security-enable-tls#configuring-nomad
-# @see https://raw.githubusercontent.com/hashicorp/nomad/master/demo/vagrant/server.hcl
-
 data_dir   = "/tmp/server1"
 datacenter = "us_east"
 log_level  = "WARN"
 name       = "development_nirvai_core_server"
 region     = "global"
 
-# dont use bind_addr = "0.0.0.0"
-# instead always be explicit
 addresses {
   http = "0.0.0.0"
   rpc  = "0.0.0.0"
   serf = "0.0.0.0"
 }
-
-// advertise {
-//   # Defaults to the first private IP address.
-//   http = "192.168.0.5"
-//   rpc  = "192.168.0.5"
-//   serf = "192.168.0.5"
-// }
 
 ports {
   http = 4646
@@ -31,7 +16,6 @@ ports {
   serf = 4658
 }
 
-# @see https://developer.hashicorp.com/nomad/docs/configuration/server
 server {
   enabled                 = true
   bootstrap_expect        = 1 # how many server nodes will there be?
@@ -52,9 +36,7 @@ server {
   }
 }
 
-# Require TLS
 tls {
-  # enable tls for http and rpc
   http = true
   rpc  = true
 
@@ -77,16 +59,9 @@ ui {
 
   vault {
     ui_url = "https://dev.nirv.ai:8200/ui"
-    // address = "${var.VAULT_ADDR}"
   }
-
-  // consul {
-  //   ui_url = "https://consul.example.com:8500/ui"
-  // }"
-
 }
 
-# enable cors
 http_api_response_headers {
   Access-Control-Allow-Origin = "*"
 }

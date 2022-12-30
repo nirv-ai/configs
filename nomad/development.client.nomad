@@ -1,8 +1,3 @@
-# @see https://developer.hashicorp.com/nomad/docs/configuration
-# @see https://developer.hashicorp.com/nomad/docs/configuration/server
-# @see https://developer.hashicorp.com/nomad/docs/drivers/docker
-# @see https://developer.hashicorp.com/nomad/tutorials/transport-security/security-enable-tls#configuring-nomad
-
 data_dir   = "/tmp/client1"
 datacenter = "us_east"
 log_level  = "WARN"
@@ -20,15 +15,11 @@ client {
   }
 }
 
-# ensure client ports are different from server ports
-## dont ask me if im stupid and how long i debugged this, its been a long day
 ports {
   http = 5656
 }
 
-# Require TLS
 tls {
-  # enable tls for http and rpc
   http = true
   rpc  = true
 
@@ -56,21 +47,9 @@ plugin "exec" {
   config {}
 }
 
-# @see somewhere on this page https://developer.hashicorp.com/nomad/docs/drivers/docker
 plugin "docker" {
   config {
     endpoint = "unix:///var/run/docker.sock"
-
-    // auth {
-    //   config = "/etc/docker-auth.json"
-    //   helper = "ecr-login"
-    // }
-
-    // tls {
-    //   cert = "/etc/nomad/nomad.pub"
-    //   key  = "/etc/nomad/nomad.pem"
-    //   ca   = "/etc/nomad/nomad.cert"
-    // }
 
     extra_labels = ["job_name", "job_id", "task_group_name", "task_name", "namespace", "node_name", "node_id"]
 
@@ -97,8 +76,3 @@ plugin "docker" {
     "net_bind_service", "setfcap", "setgid", "setpcap", "setuid", "sys_chroot", "ipc_lock"]
   }
 }
-
-# TODO
-// consul {
-//   address = "1.2.3.4:8500"
-// }

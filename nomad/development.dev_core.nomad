@@ -1,5 +1,3 @@
-# TODO: we cant use 99% of vars provided by dev as its all open source
-
 variable "name" {
   type = string
 }
