@@ -23,4 +23,4 @@
 ## haproxy
 
 - [haproxy community modules](./haproxy/modules/)
-- [reference development config used in nirv-core](./haproxy/haproxy.cfg)
+- [reference development configs](./haproxy/configs)
