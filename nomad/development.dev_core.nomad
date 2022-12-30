@@ -12,7 +12,7 @@ variable "services" {
       environment = object({
         DATA_CENTER       = string
         DEFAULT_DB        = string
-        PROJECT_HOST_NAME = string
+        PROJECT_HOSTNAME = string
         PROJECT_NAME      = string
         R_ROLE            = string
         REG_HOST_PORT     = string
@@ -45,7 +45,7 @@ variable "services" {
         POSTGRES_DB               = string
         POSTGRES_HOST_AUTH_METHOD = string
         POSTGRES_INITDB_ARGS      = string
-        PROJECT_HOST_NAME         = string
+        PROJECT_HOSTNAME         = string
         PROJECT_NAME              = string
         R_ROLE                    = string
         REG_HOST_PORT             = string
@@ -73,7 +73,7 @@ variable "services" {
         BFF_APP_ROLE      = string
         BFF_DB_CORE_ROLE  = string
         DATA_CENTER       = string
-        PROJECT_HOST_NAME = string
+        PROJECT_HOSTNAME = string
         PROJECT_NAME      = string
         REG_HOST_PORT     = string
         REGION            = string
@@ -95,7 +95,7 @@ variable "services" {
       image          = string
       environment = object({
         DATA_CENTER       = string
-        PROJECT_HOST_NAME = string
+        PROJECT_HOSTNAME = string
         PROJECT_NAME      = string
         REG_HOST_PORT     = string
         REGION            = string
@@ -190,9 +190,9 @@ job "dev_core" {
         }
         auth_soft_fail     = true # dont fail on auth errors
         force_pull         = true
-        image              = "${local.vaultenv.PROJECT_HOST_NAME}:${local.vaultenv.REG_HOST_PORT}/${local.vault.image}"
+        image              = "${local.vaultenv.PROJECT_HOSTNAME}:${local.vaultenv.REG_HOST_PORT}/${local.vault.image}"
         image_pull_timeout = "10m"
-        // hostname = "${local.vaultenv.PROJECT_HOST_NAME}"
+        // hostname = "${local.vaultenv.PROJECT_HOSTNAME}"
         cap_add = [
           "${local.vault.cap_add[0]}"
         ]
@@ -215,7 +215,7 @@ job "dev_core" {
         // DEFAULT_DB_HOST       = "${local.vaultenv.DEFAULT_DB_HOST}"
         // DEFAULT_DB_PORT       = "${local.vaultenv.DEFAULT_DB_PORT}"
         ENV                   = "development"
-        PROJECT_HOST_NAME     = "${local.vaultenv.PROJECT_HOST_NAME}"
+        PROJECT_HOSTNAME     = "${local.vaultenv.PROJECT_HOSTNAME}"
         PROJECT_NAME          = "${local.vaultenv.PROJECT_NAME}"
         R_ROLE                = "${local.vaultenv.R_ROLE}"
         REGION                = "${local.vaultenv.REGION}"
@@ -256,7 +256,7 @@ job "dev_core" {
         }
         auth_soft_fail     = true # dont fail on auth errors
         force_pull         = true
-        image              = "${local.postgresenv.PROJECT_HOST_NAME}:${local.postgresenv.REG_HOST_PORT}/${local.postgres.image}"
+        image              = "${local.postgresenv.PROJECT_HOSTNAME}:${local.postgresenv.REG_HOST_PORT}/${local.postgres.image}"
         image_pull_timeout = "10m"
         ports              = ["postgres"]
 
@@ -283,7 +283,7 @@ job "dev_core" {
         POSTGRES_INITDB_ARGS      = "${local.postgresenv.POSTGRES_INITDB_ARGS}"
         // POSTGRES_PASSWORD         = "${local.postgresenv.POSTGRES_PASSWORD}"
         // POSTGRES_USER             = "${local.postgresenv.POSTGRES_USER}"
-        PROJECT_HOST_NAME         = "${local.postgresenv.PROJECT_HOST_NAME}"
+        PROJECT_HOSTNAME         = "${local.postgresenv.PROJECT_HOSTNAME}"
         PROJECT_NAME              = "${local.postgresenv.PROJECT_NAME}"
         R_ROLE                    = "${local.postgresenv.R_ROLE}"
         REGION                    = "${local.postgresenv.REGION}"
@@ -322,7 +322,7 @@ job "dev_core" {
         }
         auth_soft_fail     = true # dont fail on auth errors
         force_pull         = true
-        image              = "${local.bffenv.PROJECT_HOST_NAME}:${local.bffenv.REG_HOST_PORT}/${local.bff.image}"
+        image              = "${local.bffenv.PROJECT_HOSTNAME}:${local.bffenv.REG_HOST_PORT}/${local.bff.image}"
         image_pull_timeout = "10m"
         # todo: this needs to be entrypoint
         // command            = "${local.bff.command[0]}"
@@ -348,7 +348,7 @@ job "dev_core" {
         NODE_ENV              = "development"
         # todo: think this needs to be nomad postgres port
         // POSTGRES_PORT_A_HOST  = "${local.bffenv.POSTGRES_PORT_A_HOST}"
-        PROJECT_HOST_NAME     = "${local.bffenv.PROJECT_HOST_NAME}"
+        PROJECT_HOSTNAME     = "${local.bffenv.PROJECT_HOSTNAME}"
         PROJECT_NAME          = "${local.bffenv.PROJECT_NAME}"
         REGION                = "${local.bffenv.REGION}"
         # this needs to consume the nomad port
@@ -397,7 +397,7 @@ job "dev_core" {
         }
         auth_soft_fail     = true # dont fail on auth errors
         force_pull         = true
-        image              = "${local.proxyenv.PROJECT_HOST_NAME}:${local.proxyenv.REG_HOST_PORT}/${local.proxy.image}"
+        image              = "${local.proxyenv.PROJECT_HOSTNAME}:${local.proxyenv.REG_HOST_PORT}/${local.proxy.image}"
         image_pull_timeout = "10m"
         ports              = ["edge", "vault", "stats"]
 
@@ -412,7 +412,7 @@ job "dev_core" {
       env {
         DATA_CENTER       = "${local.proxyenv.DATA_CENTER}"
         ENV               = "development"
-        PROJECT_HOST_NAME = "${local.proxyenv.PROJECT_HOST_NAME}"
+        PROJECT_HOSTNAME = "${local.proxyenv.PROJECT_HOSTNAME}"
         PROJECT_NAME      = "${local.proxyenv.PROJECT_NAME}"
         REGION            = "${local.proxyenv.REGION}"
       }
