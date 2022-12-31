@@ -1,0 +1,8 @@
+{
+  "allowed_policies": ["default"],
+  "ttl": "12hr",
+  "no_parent": true,
+  "orphan": true,
+  "renewable": false,
+  "token_type": "batch"
+}

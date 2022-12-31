@@ -1,8 +1,9 @@
 {
-  "allowed_policies": ["default", "policy_admin_approle"],
+  "allowed_policies": ["default", "policy_bff"],
   "no_parent": true,
   "orphan": true,
   "period": "30d",
   "renewable": true,
+  "token_explicit_max_ttl": 0,
   "token_type": "service"
 }
