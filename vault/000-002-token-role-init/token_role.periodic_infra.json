@@ -1,5 +1,5 @@
 {
-  "allowed_policies": ["default", "policy_admin_approle"],
+  "allowed_policies": ["default", "policy_periodic_infra"],
   "no_parent": true,
   "orphan": true,
   "period": "30d",
