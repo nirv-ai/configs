@@ -1,6 +1,6 @@
 {
-  "allowed_policies": ["default", "policy_admin_approle"],
-  "ttl": "20m",
+  "allowed_policies": ["default"],
+  "ttl": "60m",
   "no_parent": true,
   "orphan": true,
   "renewable": false,

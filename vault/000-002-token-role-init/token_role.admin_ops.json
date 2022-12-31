@@ -1,7 +1,7 @@
 {
   "allowed_policies": ["default", "policy_admin_ops"],
   "explicit_max_ttl": "7d",
-  "no_parent": false,
+  "no_parent": true,
   "renewable": true,
   "ttl": "24h"
 }
