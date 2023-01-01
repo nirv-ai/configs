@@ -4,14 +4,31 @@ log_level  = "WARN"
 name       = "development_nirvai_core_client"
 region     = "global"
 
-# this should be like "nomad.service.consul:4647" and a system
-# like Consul used for service discovery.
-# @see https://developer.hashicorp.com/nomad/docs/configuration/client
 client {
-  enabled = true
+  enabled          = true
+  max_kill_timeout = "10s"
+  memory_total_mb  = 2048
+  node_class       = "dev"
 
+  gc_interval         = "1m"
+  gc_max_allocs       = 50
+  cni_path            = "/opt/cni/bin"
+  bridge_network_name = "dev_core"
+
+  // servers = ["0.0.0.0:4647"]
   server_join {
-    retry_join = ["0.0.0.0:4647"]
+    retry_join     = ["0.0.0.0:4647"]
+    retry_max      = 0
+    retry_interval = "5s"
+  }
+
+  meta {
+    owner = "core"
+  }
+
+  reserved {
+    memory = 2048
+    disk   = 1024
   }
 }
 
@@ -36,6 +53,9 @@ tls {
   verify_https_client = false
 }
 
+plugin "qemu" {}
+plugin "java" {}
+plugin "exec" {}
 
 plugin "raw_exec" {
   config {
@@ -43,10 +63,8 @@ plugin "raw_exec" {
   }
 }
 
-plugin "exec" {
-  config {}
-}
 
+# @see somewhere on this page https://developer.hashicorp.com/nomad/docs/drivers/docker
 plugin "docker" {
   config {
     endpoint = "unix:///var/run/docker.sock"
@@ -75,4 +93,12 @@ plugin "docker" {
     allow_caps = ["audit_write", "chown", "dac_override", "fowner", "fsetid", "kill", "mknod",
     "net_bind_service", "setfcap", "setgid", "setpcap", "setuid", "sys_chroot", "ipc_lock"]
   }
+}
+
+vault {
+  address         = "https://dev.nirv.ai:8200"
+  cert_file       = "../../nirvai-core-letsencrypt/dev-nirv-ai/live/dev.nirv.ai/fullchain.pem"
+  key_file        = "../../nirvai-core-letsencrypt/dev-nirv-ai/live/dev.nirv.ai/privkey.pem"
+  tls_server_name = "dev.nirv.ai"
+  tls_skip_verify = false
 }
