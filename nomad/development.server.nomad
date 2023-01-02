@@ -56,8 +56,7 @@ vault {
   key_file              = "../../nirvai-core-letsencrypt/dev-nirv-ai/live/dev.nirv.ai/privkey.pem"
   tls_server_name       = "dev.nirv.ai"
   tls_skip_verify       = false
-  # TODO: set this value via a variable thats not VAULT_TOKEN
-  token                 = "supa-dupa-fly"
+  token                 = "put nomad dev token here"
 }
 
 

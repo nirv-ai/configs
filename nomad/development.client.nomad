@@ -7,29 +7,29 @@ region     = "global"
 client {
   enabled          = true
   max_kill_timeout = "10s"
-  memory_total_mb  = 2048
-  node_class       = "dev"
+  // memory_total_mb  = 2048
+  node_class = "dev"
 
   gc_interval         = "1m"
   gc_max_allocs       = 50
   cni_path            = "/opt/cni/bin"
   bridge_network_name = "dev_core"
 
-  // servers = ["0.0.0.0:4647"]
   server_join {
     retry_join     = ["0.0.0.0:4647"]
     retry_max      = 0
     retry_interval = "5s"
   }
 
+  host_volume "dev_core_postgres" {
+    path      = "/tmp/client1/data/core_postgres"
+    read_only = false
+  }
+
   meta {
     owner = "core"
   }
 
-  reserved {
-    memory = 2048
-    disk   = 1024
-  }
 }
 
 ports {

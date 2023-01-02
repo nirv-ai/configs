@@ -1,28 +1,52 @@
+# TODO: we cant use 99% of vars provided by dev as its all open source
+
 variable "name" {
   type = string
 }
-
+variable "NOMAD_DC" {
+  type    = string
+  default = "us_east"
+}
+variable "NOMAD_REGION" {
+  type    = string
+  default = "global"
+}
+variable "REG_HOST_PORT" {
+  type    = string
+  default = "5000"
+}
+variable "NOMAD_ENV" {
+  type    = string
+  default = "development"
+}
+variable "networks" {
+  type = map(map(string))
+}
+variable "volumes" {
+  type = object({
+    nirvai_core_postgres = object({
+      name     = string
+      external = bool
+    })
+  })
+}
 variable "services" {
   type = object({
     core_vault = object({
       cap_add        = list(string)
       container_name = string
       entrypoint     = list(string)
+      hostname       = string
       image          = string
       environment = object({
-        DATA_CENTER       = string
-        DEFAULT_DB        = string
         PROJECT_HOSTNAME = string
-        PROJECT_NAME      = string
-        R_ROLE            = string
-        REG_HOST_PORT     = string
-        REGION            = string
-        RW_ROLE           = string
+        PROJECT_NAME     = string
       })
       ports = list(object({
         mode      = string
         published = string
         protocol  = string
+        target    = number
       }))
       volumes = list(object({
         type   = string
@@ -36,26 +60,35 @@ variable "services" {
 
     core_postgres = object({
       container_name = string
+      hostname       = string
       image          = string
       environment = object({
-        DATA_CENTER               = string
         DEFAULT_DB                = string
+        DEFAULT_DB_ADMIN          = string
+        DEFAULT_DB_ADMIN_PW       = string
+        DEFAULT_DB_HOST           = string
+        DEFAULT_DB_PORT           = string
+        DEFAULT_DB_USER           = string
         DEFAULT_SCHEMA            = string
         PGDATA                    = string
+        PGPASSWORD                = string
         POSTGRES_DB               = string
         POSTGRES_HOST_AUTH_METHOD = string
         POSTGRES_INITDB_ARGS      = string
-        PROJECT_HOSTNAME         = string
+        POSTGRES_PASSWORD         = string
+        POSTGRES_USER             = string
+        PROJECT_HOSTNAME          = string
         PROJECT_NAME              = string
         R_ROLE                    = string
-        REG_HOST_PORT             = string
-        REGION                    = string
         RW_ROLE                   = string
+        VAULT_U                   = string
+        VAULT_P                   = string
       })
       ports = list(object({
         mode      = string
         published = string
         protocol  = string
+        target    = number
       }))
       volumes = list(object({
         type   = string
@@ -65,23 +98,27 @@ variable "services" {
     })
 
     core_bff = object({
-      command        = list(string)
       container_name = string
+      entrypoint     = list(string)
       healthcheck    = map(string)
+      hostname       = string
       image          = string
       environment = object({
-        BFF_APP_ROLE      = string
-        BFF_DB_CORE_ROLE  = string
-        DATA_CENTER       = string
-        PROJECT_HOSTNAME = string
-        PROJECT_NAME      = string
-        REG_HOST_PORT     = string
-        REGION            = string
+        APP_PORT              = string
+        BFF_APP_ROLE          = string
+        BFF_DB_CORE_ROLE      = string
+        NODE_ENV              = string
+        POSTGRES_PORT_A_HOST  = string
+        POSTGRES_SERVICE_NAME = string
+        PROJECT_HOSTNAME      = string
+        PROJECT_NAME          = string
+        VAULT_ADDR            = string
       })
       ports = list(object({
         mode      = string
         published = string
         protocol  = string
+        target    = string
       }))
       volumes = list(object({
         type   = string
@@ -92,18 +129,18 @@ variable "services" {
 
     core_proxy = object({
       container_name = string
+      entrypoint     = list(string)
+      hostname       = string
       image          = string
       environment = object({
-        DATA_CENTER       = string
         PROJECT_HOSTNAME = string
-        PROJECT_NAME      = string
-        REG_HOST_PORT     = string
-        REGION            = string
+        PROJECT_NAME     = string
       })
       ports = list(object({
         mode      = string
-        published = string
         protocol  = string
+        published = string
+        target    = string
       }))
       volumes = list(object({
         type   = string
@@ -114,25 +151,14 @@ variable "services" {
   })
 }
 
-variable "volumes" {
-  type = object({
-    nirvai_core_postgres = object({
-      name     = string
-      external = bool
-    })
-  })
-}
-
 locals {
-  volumes = var.volumes
+  # postgres_group
+  postgres    = var.services.core_postgres
+  postgresenv = var.services.core_postgres.environment
 
   # vault_group
   vault    = var.services.core_vault
   vaultenv = var.services.core_vault.environment
-
-  # postgres_group
-  postgres    = var.services.core_postgres
-  postgresenv = var.services.core_postgres.environment
 
   # bff_group
   bff    = var.services.core_bff
@@ -144,13 +170,12 @@ locals {
 }
 
 job "dev_core" {
-  datacenters = ["${local.vaultenv.DATA_CENTER}"]
-  region      = "${local.vaultenv.REGION}"
+  datacenters = ["${var.NOMAD_DC}"]
+  region      = "${var.NOMAD_REGION}"
   type        = "service"
 
   meta {
-    # turn off in prod
-    run_uuid = "${uuidv4()}"
+    run_uuid = "${uuidv4()}" # turn off in prod
   }
 
   constraint {
@@ -158,26 +183,90 @@ job "dev_core" {
     value     = "linux"
   }
 
-  # Specify this job to have rolling updates, two-at-a-time, with
-  # 30 second intervals.
-  update {
-    stagger      = "30s"
-    max_parallel = 1
+  group "postgres_group" {
+    count = 1
+    restart {
+      attempts = 1
+    }
+
+    network {
+      mode     = "bridge"
+      hostname = "${local.postgres.hostname}"
+      port "postgres" {
+        # host port set as: NOMAD_HOST_PORT_postgres
+        to = "${local.postgres.ports[0].target}"
+      }
+    }
+
+    # TODO: still receiving permission errors
+    // volume "dev_core_postgres" {
+    //   type      = "host"
+    //   source    = "dev_core_postgres"
+    //   read_only = false
+    // }
+
+    task "postgres_task" {
+      driver = "docker"
+
+      config {
+        healthchecks {
+          disable = true
+        }
+        auth_soft_fail     = true # dont fail on auth errors
+        force_pull         = true
+        image              = "${local.postgresenv.PROJECT_HOSTNAME}:${var.REG_HOST_PORT}/${local.postgres.image}"
+        image_pull_timeout = "10m"
+        ports              = ["postgres"]
+
+        volumes = [
+          "${local.vault.volumes[0].source}:${local.vault.volumes[0].target}"
+        ]
+      }
+
+      // volume_mount {
+      //   volume      = "dev_core_postgres"
+      //   destination = "${local.postgres.volumes[0].target}/pgdata"
+      //   read_only   = false
+      // }
+
+      env {
+        DEFAULT_DB                = "${local.postgresenv.DEFAULT_DB}"
+        DEFAULT_DB_ADMIN          = "${local.postgresenv.DEFAULT_DB_ADMIN}"
+        DEFAULT_DB_ADMIN_PW       = "${local.postgresenv.DEFAULT_DB_ADMIN_PW}"
+        DEFAULT_DB_HOST           = "${local.postgresenv.DEFAULT_DB_HOST}"
+        DEFAULT_DB_PORT           = "${local.postgresenv.DEFAULT_DB_PORT}"
+        DEFAULT_DB_USER           = "${local.postgresenv.DEFAULT_DB_USER}"
+        DEFAULT_SCHEMA            = "${local.postgresenv.DEFAULT_SCHEMA}"
+        ENV                       = "${var.NOMAD_ENV}"
+        PGDATA                    = "${local.postgresenv.PGDATA}"
+        PGPASSWORD                = "${local.postgresenv.PGPASSWORD}"
+        POSTGRES_DB               = "${local.postgresenv.POSTGRES_DB}"
+        POSTGRES_HOST_AUTH_METHOD = "${local.postgresenv.POSTGRES_HOST_AUTH_METHOD}"
+        POSTGRES_INITDB_ARGS      = "${local.postgresenv.POSTGRES_INITDB_ARGS}"
+        POSTGRES_PASSWORD         = "${local.postgresenv.POSTGRES_PASSWORD}"
+        POSTGRES_USER             = "${local.postgresenv.POSTGRES_USER}"
+        PROJECT_HOSTNAME          = "${local.postgresenv.PROJECT_HOSTNAME}"
+        PROJECT_NAME              = "${local.postgresenv.PROJECT_NAME}"
+        R_ROLE                    = "${local.postgresenv.R_ROLE}"
+        RW_ROLE                   = "${local.postgresenv.RW_ROLE}"
+        VAULT_P                   = "${local.postgresenv.VAULT_P}"
+        VAULT_U                   = "${local.postgresenv.VAULT_U}"
+      }
+    }
   }
 
   group "vault_group" {
     count = 1
     restart {
-      attempts = 0
+      attempts = 1
     }
 
     network {
-      // mode = "bridge" //cant be used with hostname
-      // hostname = "${local.vault.hostname}"
-
+      mode     = "bridge"
+      hostname = "${local.vault.hostname}"
       port "vault" {
-        # todo: map a nomadport to exposed image port
-        // static = parseint(local.vaultenv.VAULT_PORT_A_HOST, 10)
+        # host port set as: NOMAD_HOST_PORT_vault
+        to = "${local.vault.ports[0].target}"
       }
     }
 
@@ -189,17 +278,17 @@ job "dev_core" {
           disable = true
         }
         auth_soft_fail     = true # dont fail on auth errors
+        entrypoint         = "${local.vault.entrypoint}"
         force_pull         = true
-        image              = "${local.vaultenv.PROJECT_HOSTNAME}:${local.vaultenv.REG_HOST_PORT}/${local.vault.image}"
+        image              = "${local.vaultenv.PROJECT_HOSTNAME}:${var.REG_HOST_PORT}/${local.vault.image}"
         image_pull_timeout = "10m"
-        // hostname = "${local.vaultenv.PROJECT_HOSTNAME}"
+        ports              = ["vault"]
+
         cap_add = [
           "${local.vault.cap_add[0]}"
         ]
 
-        ports = ["vault"]
 
-        entrypoint = "${local.vault.entrypoint}"
         volumes = [
           "${local.vault.volumes[0].source}:${local.vault.volumes[0].target}",
           "${local.vault.volumes[1].source}:${local.vault.volumes[1].target}",
@@ -207,109 +296,26 @@ job "dev_core" {
         ]
       }
 
-      # @see https://developer.hashicorp.com/nomad/docs/job-specification/env
       env {
-        DATA_CENTER           = "${local.vaultenv.DATA_CENTER}"
-        DEFAULT_DB            = "${local.vaultenv.DEFAULT_DB}"
-        # todo: these should be nomad specific
-        // DEFAULT_DB_HOST       = "${local.vaultenv.DEFAULT_DB_HOST}"
-        // DEFAULT_DB_PORT       = "${local.vaultenv.DEFAULT_DB_PORT}"
-        ENV                   = "development"
-        PROJECT_HOSTNAME     = "${local.vaultenv.PROJECT_HOSTNAME}"
-        PROJECT_NAME          = "${local.vaultenv.PROJECT_NAME}"
-        R_ROLE                = "${local.vaultenv.R_ROLE}"
-        REGION                = "${local.vaultenv.REGION}"
-        RW_ROLE               = "${local.vaultenv.RW_ROLE}"
-        # this needs to consume the nomad port
-        // VAULT_ADDR            = "${local.vaultenv.VAULT_ADDR}"
+        // VAULT_ADDR = "https://$PROJECT_HOSTNAME:${NOMAD_PORT_vault}"
+        PROJECT_HOSTNAME = "${local.vaultenv.PROJECT_HOSTNAME}"
+        PROJECT_NAME     = "${local.vaultenv.PROJECT_NAME}"
       }
-
-      // resources {
-      //   cpu    = 500
-      //   memory = 256
-      // }
-    }
-  }
-
-  group "postgres_group" {
-    count = 1
-    restart {
-      attempts = 0
-    }
-
-    network {
-      // mode = "bridge" //cant be used with hostname
-      // hostname = "${local.vault.hostname}"
-
-      port "postgres" {
-        # todo: map a nomadport to the exposed image port
-        // static = parseint(local.postgresenv.POSTGRES_PORT_A_HOST, 10)
-      }
-    }
-
-    task "postgres_task" {
-      driver = "docker"
-
-      config {
-        healthchecks {
-          disable = true
-        }
-        auth_soft_fail     = true # dont fail on auth errors
-        force_pull         = true
-        image              = "${local.postgresenv.PROJECT_HOSTNAME}:${local.postgresenv.REG_HOST_PORT}/${local.postgres.image}"
-        image_pull_timeout = "10m"
-        ports              = ["postgres"]
-
-        volumes = [
-          "${local.vault.volumes[0].source}:${local.vault.volumes[0].target}"
-        ]
-      }
-
-      # @see https://developer.hashicorp.com/nomad/docs/job-specification/env
-      env {
-        DATA_CENTER               = "${local.postgresenv.DATA_CENTER}"
-        DEFAULT_DB                = "${local.postgresenv.DEFAULT_DB}"
-        // DEFAULT_DB_ADMIN          = "${local.postgresenv.DEFAULT_DB_ADMIN}"
-        // DEFAULT_DB_ADMIN_PW       = "${local.postgresenv.DEFAULT_DB_ADMIN_PW}"
-        // DEFAULT_DB_HOST           = "${local.postgresenv.DEFAULT_DB_HOST}"
-        // DEFAULT_DB_MAX_CONN       = "${local.postgresenv.DEFAULT_DB_MAX_CONN}"
-        // DEFAULT_DB_PORT           = "${local.postgresenv.DEFAULT_DB_PORT}"
-        // DEFAULT_DB_USER           = "${local.postgresenv.DEFAULT_DB_USER}"
-        DEFAULT_SCHEMA            = "${local.postgresenv.DEFAULT_SCHEMA}"
-        ENV                       = "development"
-        PGDATA                    = "${local.postgresenv.PGDATA}"
-        // PGPASSWORD                = "${local.postgresenv.PGPASSWORD}"
-        POSTGRES_HOST_AUTH_METHOD = "${local.postgresenv.POSTGRES_HOST_AUTH_METHOD}"
-        POSTGRES_INITDB_ARGS      = "${local.postgresenv.POSTGRES_INITDB_ARGS}"
-        // POSTGRES_PASSWORD         = "${local.postgresenv.POSTGRES_PASSWORD}"
-        // POSTGRES_USER             = "${local.postgresenv.POSTGRES_USER}"
-        PROJECT_HOSTNAME         = "${local.postgresenv.PROJECT_HOSTNAME}"
-        PROJECT_NAME              = "${local.postgresenv.PROJECT_NAME}"
-        R_ROLE                    = "${local.postgresenv.R_ROLE}"
-        REGION                    = "${local.postgresenv.REGION}"
-        RW_ROLE                   = "${local.postgresenv.RW_ROLE}"
-      }
-
-      // resources {
-      //   cpu    = 500
-      //   memory = 256
-      // }
     }
   }
 
   group "bff_group" {
     count = 1
     restart {
-      attempts = 0
+      attempts = 1
     }
 
     network {
-      // mode = "bridge" //cant be used with hostname
-      // hostname = "${local.vault.hostname}"
-
+      mode     = "bridge"
+      hostname = "${local.bff.hostname}"
       port "bff" {
-        # todo: map a nomadport to exposed image port
-        // static = parseint(local.bffenv.APP_PORT, 10)
+        # host port set as: NOMAD_HOST_PORT_bff
+        to = "${local.bff.ports[0].target}"
       }
     }
 
@@ -321,12 +327,10 @@ job "dev_core" {
           disable = true
         }
         auth_soft_fail     = true # dont fail on auth errors
+        entrypoint         = "${local.bff.entrypoint}"
         force_pull         = true
-        image              = "${local.bffenv.PROJECT_HOSTNAME}:${local.bffenv.REG_HOST_PORT}/${local.bff.image}"
+        image              = "${local.bffenv.PROJECT_HOSTNAME}:${var.REG_HOST_PORT}/${local.bff.image}"
         image_pull_timeout = "10m"
-        # todo: this needs to be entrypoint
-        // command            = "${local.bff.command[0]}"
-        // args               = ["${local.bff.command[1]}"]
         ports              = ["bff"]
 
         volumes = [
@@ -335,56 +339,41 @@ job "dev_core" {
         ]
       }
 
-      # @see https://developer.hashicorp.com/nomad/docs/job-specification/env
       env {
         APP_PORT              = "${local.bffenv.APP_PORT}"
         BFF_APP_ROLE          = "${local.bffenv.BFF_APP_ROLE}"
         BFF_DB_CORE_ROLE      = "${local.bffenv.BFF_DB_CORE_ROLE}"
-        # TODO: need to assign and retrieve these
-        // BFF_ROLE_ID           = "${local.bffenv.BFF_ROLE_ID}"
-        // BFF_SECRET_ID         = "${local.bffenv.BFF_SECRET_ID}"
-        DATA_CENTER           = "${local.bffenv.DATA_CENTER}"
-        ENV                   = "development"
-        NODE_ENV              = "development"
-        # todo: think this needs to be nomad postgres port
-        // POSTGRES_PORT_A_HOST  = "${local.bffenv.POSTGRES_PORT_A_HOST}"
-        PROJECT_HOSTNAME     = "${local.bffenv.PROJECT_HOSTNAME}"
+        NODE_ENV              = "${local.bffenv.NODE_ENV}"
+        POSTGRES_PORT_A_HOST  = "${local.bffenv.POSTGRES_PORT_A_HOST}"
+        POSTGRES_SERVICE_NAME = "${local.bffenv.POSTGRES_SERVICE_NAME}"
+        PROJECT_HOSTNAME      = "${local.bffenv.PROJECT_HOSTNAME}"
         PROJECT_NAME          = "${local.bffenv.PROJECT_NAME}"
-        REGION                = "${local.bffenv.REGION}"
-        # this needs to consume the nomad port
-        # and pretty sure we hard coded this in the node app
-        // VAULT_ADDR            = "${local.vaultenv.VAULT_ADDR}"
+        VAULT_ADDR            = "${local.bffenv.VAULT_ADDR}"
       }
-
-      // resources {
-      //   cpu    = 500
-      //   memory = 256
-      // }
     }
   }
 
-  # we need to setup the server templates in haproxy
   group "proxy_group" {
     count = 1
     restart {
-      attempts = 0
+      attempts = 1
     }
 
     network {
-      // mode = "bridge" //cant be used with hostname
-      // hostname = "${local.vault.hostname}"
+      mode     = "bridge"
+      hostname = "${local.proxy.hostname}"
 
       port "edge" {
-        # todo: map a nomadport to exposed image port
-        // static = parseint(local.proxyenv.PROXY_PORT_A_HOST, 10)
+        # host port set as: NOMAD_HOST_PORT_edge
+        to = "${local.proxy.ports[0].target}"
       }
       port "vault" {
-        # todo: map a nomadport to exposed image port
-        // static = parseint(local.proxyenv.PROXY_PORT_B_HOST, 10)
+        # host port set as: NOMAD_HOST_PORT_vault
+        to = "${local.proxy.ports[1].target}"
       }
       port "stats" {
-        # todo: map a nomadport to exposed image port
-        // static = parseint(local.proxyenv.PROXY_PORT_C_HOST, 10)
+        # host port set as: NOMAD_HOST_PORT_stats
+        to = "${local.proxy.ports[2].target}"
       }
     }
 
@@ -396,8 +385,9 @@ job "dev_core" {
           disable = true
         }
         auth_soft_fail     = true # dont fail on auth errors
+        entrypoint         = "${local.proxy.entrypoint}"
         force_pull         = true
-        image              = "${local.proxyenv.PROJECT_HOSTNAME}:${local.proxyenv.REG_HOST_PORT}/${local.proxy.image}"
+        image              = "${local.proxyenv.PROJECT_HOSTNAME}:${var.REG_HOST_PORT}/${local.proxy.image}"
         image_pull_timeout = "10m"
         ports              = ["edge", "vault", "stats"]
 
@@ -408,19 +398,10 @@ job "dev_core" {
         ]
       }
 
-      # @see https://developer.hashicorp.com/nomad/docs/job-specification/env
       env {
-        DATA_CENTER       = "${local.proxyenv.DATA_CENTER}"
-        ENV               = "development"
         PROJECT_HOSTNAME = "${local.proxyenv.PROJECT_HOSTNAME}"
-        PROJECT_NAME      = "${local.proxyenv.PROJECT_NAME}"
-        REGION            = "${local.proxyenv.REGION}"
+        PROJECT_NAME     = "${local.proxyenv.PROJECT_NAME}"
       }
-
-      // resources {
-      //   cpu    = 500
-      //   memory = 256
-      // }
     }
   }
 }
