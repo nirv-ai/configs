@@ -1,7 +1,7 @@
 data_dir   = "/tmp/client1"
 datacenter = "us_east"
 log_level  = "WARN"
-name       = "development_nirvai_core_client"
+name       = "development_nirvai_web_client"
 region     = "global"
 
 client {
@@ -21,8 +21,8 @@ client {
     retry_interval = "5s"
   }
 
-  host_volume "dev_core_postgres" {
-    path      = "/tmp/client1/data/core_postgres"
+  host_volume "dev_web_postgres" {
+    path      = "/tmp/client1/data/web_postgres"
     read_only = false
   }
 
@@ -97,8 +97,8 @@ plugin "docker" {
 
 vault {
   address         = "https://dev.nirv.ai:8200"
-  cert_file       = "../../nirvai-core-letsencrypt/dev-nirv-ai/live/dev.nirv.ai/fullchain.pem"
-  key_file        = "../../nirvai-core-letsencrypt/dev-nirv-ai/live/dev.nirv.ai/privkey.pem"
+  cert_file       = "../../nirvai-web-letsencrypt/dev-nirv-ai/live/dev.nirv.ai/fullchain.pem"
+  key_file        = "../../nirvai-web-letsencrypt/dev-nirv-ai/live/dev.nirv.ai/privkey.pem"
   tls_server_name = "dev.nirv.ai"
   tls_skip_verify = false
 }

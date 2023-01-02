@@ -1,7 +1,7 @@
 ########################
 # database admin
 # @see https://developer.hashicorp.com/vault/tutorials/db-credentials/database-secrets
-# core-postgres: postgresql://{{username}}:{{password}}@nirvai-core-postgres:5432/nirvai?sslmode=disable
+# core-postgres: postgresql://{{username}}:{{password}}@nirvai-web-postgres:5432/nirvai?sslmode=disable
 ########################
 
 # Mount secrets engines

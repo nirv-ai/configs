@@ -1,7 +1,7 @@
 data_dir   = "/tmp/server1"
 datacenter = "us_east"
 log_level  = "WARN"
-name       = "development_nirvai_core_server"
+name       = "development_nirvai_web_server"
 region     = "global"
 
 addresses {
@@ -50,10 +50,10 @@ tls {
 vault {
   address               = "https://dev.nirv.ai:8200"
   allow_unauthenticated = true
-  cert_file             = "../../nirvai-core-letsencrypt/dev-nirv-ai/live/dev.nirv.ai/fullchain.pem"
+  cert_file             = "../../nirvai-web-letsencrypt/dev-nirv-ai/live/dev.nirv.ai/fullchain.pem"
   create_from_role      = "periodic_infra"
   enabled               = true
-  key_file              = "../../nirvai-core-letsencrypt/dev-nirv-ai/live/dev.nirv.ai/privkey.pem"
+  key_file              = "../../nirvai-web-letsencrypt/dev-nirv-ai/live/dev.nirv.ai/privkey.pem"
   tls_server_name       = "dev.nirv.ai"
   tls_skip_verify       = false
   token                 = "put nomad dev token here"
