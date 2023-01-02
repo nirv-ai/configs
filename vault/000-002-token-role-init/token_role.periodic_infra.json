@@ -1,5 +1,5 @@
 {
-  "allowed_policies": ["default", "policy_bff"],
+  "disallowed_policies": "policy_periodic_infra",
   "no_parent": true,
   "orphan": true,
   "period": "30d",

@@ -18,7 +18,7 @@ ports {
 
 server {
   enabled                 = true
-  bootstrap_expect        = 1 # how many server nodes will there be?
+  bootstrap_expect        = 1
   node_gc_threshold       = "10m"
   job_gc_interval         = "10m"
   eval_gc_threshold       = "10m"
@@ -40,17 +40,23 @@ tls {
   http = true
   rpc  = true
 
-  ca_file   = "./tls/nomad-ca.pem"
-  cert_file = "./tls/server.pem"
-  key_file  = "./tls/server-key.pem"
-
-  # if set to false
-  # will only ensure each node is signed by the same CA
-  # but ignore the nodes region and role
+  ca_file                = "./tls/nomad-ca.pem"
+  cert_file              = "./tls/server.pem"
+  key_file               = "./tls/server-key.pem"
   verify_server_hostname = true
-  # requires http api clients to present a cert signed by the same CA as nomads cert
-  # enabling list prevents consul https health checks for agents
-  verify_https_client = false
+  verify_https_client    = false
+}
+
+vault {
+  address               = "https://dev.nirv.ai:8200"
+  allow_unauthenticated = true
+  cert_file             = "../../nirvai-core-letsencrypt/dev-nirv-ai/live/dev.nirv.ai/fullchain.pem"
+  create_from_role      = "periodic_infra"
+  enabled               = true
+  key_file              = "../../nirvai-core-letsencrypt/dev-nirv-ai/live/dev.nirv.ai/privkey.pem"
+  tls_server_name       = "dev.nirv.ai"
+  tls_skip_verify       = false
+  token                 = "put nomad dev token here"
 }
 
 
@@ -60,6 +66,11 @@ ui {
   vault {
     ui_url = "https://dev.nirv.ai:8200/ui"
   }
+
+  // consul {
+  //   ui_url = "https://consul.example.com:8500/ui"
+  // }"
+
 }
 
 http_api_response_headers {
