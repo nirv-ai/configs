@@ -97,8 +97,8 @@ plugin "docker" {
 
 vault {
   address         = "https://dev.nirv.ai:8200"
-  cert_file       = "../../nirvai-web-letsencrypt/dev-nirv-ai/live/dev.nirv.ai/fullchain.pem"
-  key_file        = "../../nirvai-web-letsencrypt/dev-nirv-ai/live/dev.nirv.ai/privkey.pem"
+  cert_file       = "/etc/ssl/certs/dev.nirv.ai/fullchain.pem"
+  key_file        = "/etc/ssl/certs/dev.nirv.ai/privkey.pem"
   tls_server_name = "dev.nirv.ai"
   tls_skip_verify = false
 }
