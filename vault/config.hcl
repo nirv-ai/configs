@@ -23,8 +23,8 @@ cluster_addr = "https://127.0.0.1:8301"
 
 listener "tcp" {
   address = "0.0.0.0:8300" # provides access to vault UI
-  tls_cert_file = "/etc/ssl/certs/live/dev.nirv.ai/fullchain.pem"
-  tls_key_file = "/etc/ssl/certs/live/dev.nirv.ai/privkey.pem"
+  tls_cert_file = "/etc/ssl/certs/dev.nirv.ai/fullchain.pem"
+  tls_key_file = "/etc/ssl/certs/dev.nirv.ai/privkey.pem"
   tls_disable = false
 }
 

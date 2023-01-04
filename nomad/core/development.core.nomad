@@ -15,7 +15,7 @@ variable "REG_HOST_PORT" {
   type    = string
   default = "5000"
 }
-variable "NOMAD_ENV" {
+variable "WEB_ENV" {
   type    = string
   default = "development"
 }
@@ -24,7 +24,7 @@ variable "networks" {
 }
 variable "volumes" {
   type = object({
-    nirvai_core_postgres = object({
+    nirvai_web_postgres = object({
       name     = string
       external = bool
     })
@@ -32,7 +32,7 @@ variable "volumes" {
 }
 variable "services" {
   type = object({
-    core_vault = object({
+    web_vault = object({
       cap_add        = list(string)
       container_name = string
       entrypoint     = list(string)
@@ -58,7 +58,7 @@ variable "services" {
       }))
     })
 
-    core_postgres = object({
+    web_postgres = object({
       container_name = string
       hostname       = string
       image          = string
@@ -97,19 +97,19 @@ variable "services" {
       }))
     })
 
-    core_bff = object({
+    web_bff = object({
       container_name = string
       entrypoint     = list(string)
       healthcheck    = map(string)
       hostname       = string
       image          = string
       environment = object({
-        APP_PORT              = string
+        WEB_BFF_PORT              = string
         BFF_APP_ROLE          = string
         BFF_DB_CORE_ROLE      = string
         NODE_ENV              = string
-        POSTGRES_PORT_A_HOST  = string
-        POSTGRES_SERVICE_NAME = string
+        WEB_POSTGRES_PORT  = string
+        WEB_POSTGRES_HOSTNAME = string
         PROJECT_HOSTNAME      = string
         PROJECT_NAME          = string
         VAULT_ADDR            = string
@@ -153,16 +153,16 @@ variable "services" {
 
 locals {
   # postgres_group
-  postgres    = var.services.core_postgres
-  postgresenv = var.services.core_postgres.environment
+  postgres    = var.services.web_postgres
+  postgresenv = var.services.web_postgres.environment
 
   # vault_group
-  vault    = var.services.core_vault
-  vaultenv = var.services.core_vault.environment
+  vault    = var.services.web_vault
+  vaultenv = var.services.web_vault.environment
 
   # bff_group
-  bff    = var.services.core_bff
-  bffenv = var.services.core_bff.environment
+  bff    = var.services.web_bff
+  bffenv = var.services.web_bff.environment
 
   # proxy_group
   proxy    = var.services.core_proxy
@@ -199,9 +199,9 @@ job "dev_core" {
     }
 
     # TODO: still receiving permission errors
-    // volume "dev_core_postgres" {
+    // volume "dev_web_postgres" {
     //   type      = "host"
-    //   source    = "dev_core_postgres"
+    //   source    = "dev_web_postgres"
     //   read_only = false
     // }
 
@@ -224,7 +224,7 @@ job "dev_core" {
       }
 
       // volume_mount {
-      //   volume      = "dev_core_postgres"
+      //   volume      = "dev_web_postgres"
       //   destination = "${local.postgres.volumes[0].target}/pgdata"
       //   read_only   = false
       // }
@@ -237,7 +237,7 @@ job "dev_core" {
         DEFAULT_DB_PORT           = "${local.postgresenv.DEFAULT_DB_PORT}"
         DEFAULT_DB_USER           = "${local.postgresenv.DEFAULT_DB_USER}"
         DEFAULT_SCHEMA            = "${local.postgresenv.DEFAULT_SCHEMA}"
-        ENV                       = "${var.NOMAD_ENV}"
+        ENV                       = "${var.WEB_ENV}"
         PGDATA                    = "${local.postgresenv.PGDATA}"
         PGPASSWORD                = "${local.postgresenv.PGPASSWORD}"
         POSTGRES_DB               = "${local.postgresenv.POSTGRES_DB}"
@@ -340,12 +340,12 @@ job "dev_core" {
       }
 
       env {
-        APP_PORT              = "${local.bffenv.APP_PORT}"
+        WEB_BFF_PORT              = "${local.bffenv.WEB_BFF_PORT}"
         BFF_APP_ROLE          = "${local.bffenv.BFF_APP_ROLE}"
         BFF_DB_CORE_ROLE      = "${local.bffenv.BFF_DB_CORE_ROLE}"
         NODE_ENV              = "${local.bffenv.NODE_ENV}"
-        POSTGRES_PORT_A_HOST  = "${local.bffenv.POSTGRES_PORT_A_HOST}"
-        POSTGRES_SERVICE_NAME = "${local.bffenv.POSTGRES_SERVICE_NAME}"
+        WEB_POSTGRES_PORT  = "${local.bffenv.WEB_POSTGRES_PORT}"
+        WEB_POSTGRES_HOSTNAME = "${local.bffenv.WEB_POSTGRES_HOSTNAME}"
         PROJECT_HOSTNAME      = "${local.bffenv.PROJECT_HOSTNAME}"
         PROJECT_NAME          = "${local.bffenv.PROJECT_NAME}"
         VAULT_ADDR            = "${local.bffenv.VAULT_ADDR}"
