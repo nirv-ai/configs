@@ -1,4 +1,4 @@
-data_dir = "../data"
+data_dir = "/consul/data"
 enable_local_script_checks = true
 enable_script_checks = false
 log_level = "INFO"
@@ -11,7 +11,8 @@ addresses {
 }
 ports {
   dns   = 8600
-  grpc  = 8502
+  grpc = 8502
+  grpc_tls  = 8503
   http  = 8500
   https = 8443
 }
