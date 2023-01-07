@@ -96,7 +96,6 @@ services:
     volumes:
       - ./apps/nirvai-core-proxy/src:/usr/local/etc/haproxy:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro,z
-
     ### build ###
     image: ${REG_HOSTNAME}:${REG_PORT_HOST}/${COMPOSE_PROJECT_NAME}/core-proxy:${ENV:?environment is required}
     build:
@@ -125,7 +124,6 @@ services:
     volumes:
       - ./apps/nirvai-core-vault/src/config:/vault/config
       - ./apps/nirvai-core-vault/src/data:/vault/data
-
     ### build ###
     image: ${REG_HOSTNAME}:${REG_PORT_HOST}/${COMPOSE_PROJECT_NAME}/core-vault:${ENV:-development}
     build:
@@ -157,7 +155,6 @@ services:
       - ./apps/nirvai-core-consul/src/config:/consul/config:rw,z
       - ./apps/nirvai-core-consul/src/data:/consul/data:rw,z
       - /var/run/docker.sock:/var/run/docker.sock:ro,z
-
     ### build ###
     # command: "agent -dev -client 0.0.0.0"
     # entrypoint: ./consul.compose.bootstrap.sh
