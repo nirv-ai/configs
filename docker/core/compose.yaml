@@ -24,13 +24,10 @@ x-nirvai-fullchain: &host-fullchain
 
 
 ### ${MESH_HOSTNAME} ###
+# SERVER
 x-mesh-ca: &mesh-ca
   mode: 0444
   source: mesh_ca
-  target: consul_ca.pem
-x-mesh-ca-clients: &mesh-ca-clients
-  mode: 0444
-  source: mesh_ca_clients
   target: consul_ca.pem
 x-mesh-server: &mesh-server
   mode: 0444
@@ -40,6 +37,7 @@ x-mesh-server-privkey: &mesh-server-privkey
   mode: 0440
   source: mesh_server_privkey
   target: consul_server_privkey.pem
+# PROXY
 x-mesh-core-proxy: &mesh-core-proxy
   mode: 0444
   source: mesh_core_proxy
@@ -47,6 +45,15 @@ x-mesh-core-proxy: &mesh-core-proxy
 x-mesh-core-proxy-privkey: &mesh-core-proxy-privkey
   mode: 0440
   source: mesh_core_proxy_privkey
+  target: consul_server_privkey.pem
+# VAULT
+x-mesh-core-vault: &mesh-core-vault
+  mode: 0444
+  source: mesh_core_vault
+  target: consul_server.pem
+x-mesh-core-vault-privkey: &mesh-core-vault-privkey
+  mode: 0440
+  source: mesh_core_vault_privkey
   target: consul_server_privkey.pem
 
 
@@ -132,15 +139,15 @@ services:
           - core_proxy
     ports:
       - "${CONSUL_PORT_CUNT}/tcp"
-      - "${CONSUL_PORT_SERF_LAN}/tcp"
       - "${CONSUL_PORT_DNS}/tcp"
       - "${CONSUL_PORT_DNS}/udp"
+      - "${CONSUL_PORT_SERF_LAN}/tcp"
       - "${CONSUL_PORT_SERF_WAN}/tcp"
       - "${PROXY_PORT_STATS}:${PROXY_PORT_STATS}"
       - "${PROXY_PORT_VAULT}:${PROXY_PORT_VAULT}"
     secrets:
       - *host-combined
-      - *mesh-ca-clients
+      - *mesh-ca
       - *mesh-core-proxy
       - *mesh-core-proxy-privkey
     volumes:
@@ -172,16 +179,29 @@ services:
         aliases:
           - ${VAULT_HOSTNAME}
     ports:
+      - "${CONSUL_PORT_CUNT}/tcp"
+      - "${CONSUL_PORT_DNS}/tcp"
+      - "${CONSUL_PORT_DNS}/udp"
+      - "${CONSUL_PORT_SERF_LAN}/tcp"
+      - "${CONSUL_PORT_SERF_WAN}/tcp"
       - "${VAULT_PORT_CUNT}:${VAULT_PORT_CUNT}"
     secrets:
       - *host-fullchain
       - *host-privkey
+      - *mesh-ca
+      - *mesh-core-vault
+      - *mesh-core-vault-privkey
     volumes:
-      - ./apps/nirvai-core-vault/src/config:/vault/config
-      - ./apps/nirvai-core-vault/src/data:/vault/data
+      - ./apps/nirvai-core-vault/src/consul/config:/consul/config:rw,z
+      - ./apps/nirvai-core-vault/src/consul/data:/consul/data:rw,z
+      - ./apps/nirvai-core-vault/src/vault/config:/vault/config
+      - ./apps/nirvai-core-vault/src/vault/data:/vault/data
     ### build ###
     image: ${REG_HOSTNAME}:${REG_PORT_HOST}/${COMPOSE_PROJECT_NAME}/core-vault:${ENV:?environment is required}
     build:
+      args:
+        CONSUL_UID:
+        CONSUL_GID:
       context: ./apps/nirvai-core-vault/src
       dockerfile: ./vault.compose.Dockerfile
 
@@ -202,8 +222,6 @@ secrets:
     file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/fullchain.pem"
   mesh_ca:
     file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/ca.pem"
-  mesh_ca_clients:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/ca_TEMP_CONSUL_GID_UID.pem"
   mesh_server:
     file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/server-0.pem"
   mesh_server_privkey:
@@ -212,3 +230,7 @@ secrets:
     file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-proxy.pem"
   mesh_core_proxy_privkey:
     file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-proxy-key.pem"
+  mesh_core_vault:
+    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-vault.pem"
+  mesh_core_vault_privkey:
+    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-vault-key.pem"

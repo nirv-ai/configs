@@ -3,11 +3,15 @@
 # @see https://hub.docker.com/_/vault
 FROM vault:1.12.2 AS vault_build
 
-# https://github.com/hashicorp/docker-consul/blob/master/0.X/Dockerfile
+# CONSUL
+# @see https://github.com/hashicorp/docker-consul/blob/master/0.X/Dockerfile
 ARG CONSUL_VERSION=1.14.3
+ARG CONSUL_GID
+ARG CONSUL_UID
+
 ENV HASHICORP_RELEASES=https://releases.hashicorp.com
-RUN addgroup consul && \
-    adduser -S -G consul consul
+RUN addgroup --gid $CONSUL_GID consul && \
+    adduser -D -G consul -u $CONSUL_UID -s /bin/sh consul
 RUN set -eux && \
     apk add --no-cache ca-certificates curl gnupg libcap openssl su-exec iputils jq libc6-compat iptables tzdata && \
     gpg --keyserver keyserver.ubuntu.com --recv-keys C874011F0AB405110D02105534365D9472D7468F && \
@@ -40,5 +44,11 @@ RUN test -e /etc/nsswitch.conf || echo 'hosts: files dns' > /etc/nsswitch.conf
 RUN mkdir -p /consul/data && \
     mkdir -p /consul/config && \
     chown -R consul:consul /consul
+COPY --chown=consul:consul ./consul/consul.compose.bootstrap.sh ./consul
 
-COPY ./vault.compose.bootstrap.sh .
+# VAULT
+# @see https://github.com/hashicorp/docker-vault/blob/master/0.X/Dockerfile
+# all the dirs are already created
+WORKDIR /vault
+# FYI: you shown chown -R $USER:$USER this dir on host
+COPY --chown=vault:vault ./vault/vault.compose.bootstrap.sh .
