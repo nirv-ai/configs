@@ -11,11 +11,13 @@ tls {
     # TODO:
     # ^ verify_incoming must be set to true to prevent anyone with access
     # ^ to the internal RPC port from gaining full access to the Consul cluster.
+    # pretty sure we just need to install & trust the local ca cert in the browser
     verify_incoming        = false  # setting true breaks ui
     verify_outgoing        = true
   }
 }
 
+# will auto created client tls certificates
 auto_encrypt {
   allow_tls = true
 }
