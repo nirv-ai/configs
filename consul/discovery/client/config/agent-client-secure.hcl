@@ -6,8 +6,7 @@ enable_script_checks = false
 log_level = "DEBUG"
 server = false
 
-# TODO
-retry_join = [ "${SERVER_NAME}${FQDN_SUFFIX}" ]
+retry_join = [ "server.us-east.mesh.nirv.ai" ]
 
 ports {
   dns   = 8600
