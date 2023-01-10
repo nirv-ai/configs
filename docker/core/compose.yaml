@@ -94,7 +94,8 @@ services:
           - ${MESH_SERVER_HOSTNAME}
     ports:
       - "${CONSUL_PORT_CUNT}:${CONSUL_PORT_CUNT}/tcp"
-      - "${CONSUL_PORT_SERVER}:${CONSUL_PORT_SERVER}/tcp"
+      - "${CONSUL_PORT_SERF_LAN}:${CONSUL_PORT_SERF_LAN}/tcp"
+      - "${CONSUL_PORT_SERF_WAN}:${CONSUL_PORT_SERF_WAN}/tcp"
       - "${CONSUL_PORT_DNS}:${CONSUL_PORT_DNS}/tcp"
       - "${CONSUL_PORT_DNS}:${CONSUL_PORT_DNS}/udp"
     secrets:
@@ -130,6 +131,11 @@ services:
           - ${PROJECT_HOSTNAME} # proxy is the entrypoint to the project
           - core_proxy
     ports:
+      - "${CONSUL_PORT_CUNT}/tcp"
+      - "${CONSUL_PORT_SERF_LAN}/tcp"
+      - "${CONSUL_PORT_DNS}/tcp"
+      - "${CONSUL_PORT_DNS}/udp"
+      - "${CONSUL_PORT_SERF_WAN}/tcp"
       - "${PROXY_PORT_STATS}:${PROXY_PORT_STATS}"
       - "${PROXY_PORT_VAULT}:${PROXY_PORT_VAULT}"
     secrets:
