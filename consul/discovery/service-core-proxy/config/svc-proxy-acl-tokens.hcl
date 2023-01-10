@@ -1,6 +1,6 @@
 acl {
   tokens {
-    agent  = "STATIC_TOKEN_HERE"
-    default  = "STATIC_TOKEN_HERE"
+    agent  = "SOME_DEV_TOKEN"
+    default  = "SOME_DEV_TOKEN"
   }
 }

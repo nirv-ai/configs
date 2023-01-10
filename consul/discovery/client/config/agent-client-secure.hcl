@@ -6,7 +6,7 @@ enable_script_checks = false
 log_level = "DEBUG"
 server = false
 
-retry_join = [ "server.us-east.mesh.nirv.ai" ]
+retry_join = [ "MACHINE_IP_OR_HOSTNAME" ]
 
 ports {
   dns   = 8600
