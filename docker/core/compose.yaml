@@ -22,10 +22,15 @@ x-nirvai-fullchain: &host-fullchain
   source: nirvai_fullchain
   target: host_fullchain.pem
 
+
 ### ${MESH_HOSTNAME} ###
 x-mesh-ca: &mesh-ca
   mode: 0444
   source: mesh_ca
+  target: consul_ca.pem
+x-mesh-ca-clients: &mesh-ca-clients
+  mode: 0444
+  source: mesh_ca_clients
   target: consul_ca.pem
 x-mesh-server: &mesh-server
   mode: 0444
@@ -37,12 +42,13 @@ x-mesh-server-privkey: &mesh-server-privkey
   target: consul_server_privkey.pem
 x-mesh-core-proxy: &mesh-core-proxy
   mode: 0444
-  source: mesh_server
+  source: mesh_core_proxy
   target: consul_server.pem
 x-mesh-core-proxy-privkey: &mesh-core-proxy-privkey
   mode: 0440
-  source: mesh_server_privkey
+  source: mesh_core_proxy_privkey
   target: consul_server_privkey.pem
+
 
 ### services ###
 x-service-defaults: &service-defaults
@@ -73,11 +79,10 @@ x-deploy: &service-deploy
 
 services:
   core_consul:
-    command: "agent -node=consul -domain=${MESH_HOSTNAME}"
     <<: *service-defaults
     deploy:
       <<: *service-deploy
-    # entrypoint: ./consul.compose.bootstrap.sh
+    entrypoint: ./consul.compose.bootstrap.sh
     env_file:
       - ./.env
       - ./apps/nirvai-core-consul/.env.consul
@@ -103,6 +108,9 @@ services:
     ### build ###
     image: ${REG_HOSTNAME}:${REG_PORT_HOST}/${COMPOSE_PROJECT_NAME}/core-consul:${ENV:?environment is required}
     build:
+      args:
+        CONSUL_UID:
+        CONSUL_GID:
       context: ./apps/nirvai-core-consul/src
       dockerfile: ./consul.compose.Dockerfile
 
@@ -126,7 +134,7 @@ services:
       - "${PROXY_PORT_VAULT}:${PROXY_PORT_VAULT}"
     secrets:
       - *host-combined
-      - *mesh-ca
+      - *mesh-ca-clients
       - *mesh-core-proxy
       - *mesh-core-proxy-privkey
     volumes:
@@ -137,6 +145,9 @@ services:
     ### build ###
     image: ${REG_HOSTNAME}:${REG_PORT_HOST}/${COMPOSE_PROJECT_NAME}/core-proxy:${ENV:?environment is required}
     build:
+      args:
+        CONSUL_UID:
+        CONSUL_GID:
       context: ./apps/nirvai-core-proxy/src
       dockerfile: ./haproxy.compose.Dockerfile
 
@@ -185,11 +196,13 @@ secrets:
     file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/fullchain.pem"
   mesh_ca:
     file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/ca.pem"
+  mesh_ca_clients:
+    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/ca_TEMP_CONSUL_GID_UID.pem"
   mesh_server:
     file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/server-0.pem"
   mesh_server_privkey:
     file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/server-0-key.pem"
   mesh_core_proxy:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core_proxy.pem"
+    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-proxy.pem"
   mesh_core_proxy_privkey:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core_proxy-key.pem"
+    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-proxy-key.pem"

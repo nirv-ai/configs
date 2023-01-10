@@ -10,9 +10,12 @@ RUN \
   apt-get install -y unzip ca-certificates curl gnupg libcap-dev openssl jq libc6 iptables tzdata nano
 
 ARG CONSUL_VERSION=1.14.3
+ARG CONSUL_GID
+ARG CONSUL_UID
+
 ENV HASHICORP_RELEASES=https://releases.hashicorp.com
-RUN groupadd -r -g 1001 consul && \
-    useradd -ms /bin/sh -g consul -u 1001 consul
+RUN groupadd -r -g $CONSUL_GID consul && \
+    useradd -ms /bin/sh -g consul -u $CONSUL_UID consul
 RUN mkdir -p /consul/data && \
     mkdir -p /consul/config && \
     chown -R consul:consul /consul
