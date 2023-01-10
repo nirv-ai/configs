@@ -11,11 +11,6 @@ tls {
   }
 }
 
-# will auto created client tls certificates
-auto_encrypt {
-  allow_tls = true
-}
-
 http_config {
   response_headers {
     Access-Control-Allow-Origin = "*"
