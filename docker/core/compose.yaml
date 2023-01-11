@@ -1,0 +1,236 @@
+name: ${COMPOSE_PROJECT_NAME}
+
+### ${PROJECT_HOSTNAME} ###
+x-nirvai-cert: &host-cert
+  mode: 0444
+  source: nirvai_cert
+  target: host_cert.pem
+x-nirvai-chain: &host-chain
+  mode: 0444
+  source: nirvai_chain
+  target: host_chain.pem
+x-nirvai-combined: &host-combined
+  mode: 0444
+  source: nirvai_combined
+  target: host_combined.pem
+x-nirvai-privkey: &host-privkey
+  mode: 0440
+  source: nirvai_privkey
+  target: host_privkey.pem
+x-nirvai-fullchain: &host-fullchain
+  mode: 0444
+  source: nirvai_fullchain
+  target: host_fullchain.pem
+
+
+### ${MESH_HOSTNAME} ###
+# SERVER
+x-mesh-ca: &mesh-ca
+  mode: 0444
+  source: mesh_ca
+  target: consul_ca.pem
+x-mesh-server: &mesh-server
+  mode: 0444
+  source: mesh_server
+  target: consul_server.pem
+x-mesh-server-privkey: &mesh-server-privkey
+  mode: 0440
+  source: mesh_server_privkey
+  target: consul_server_privkey.pem
+# PROXY
+x-mesh-core-proxy: &mesh-core-proxy
+  mode: 0444
+  source: mesh_core_proxy
+  target: consul_server.pem
+x-mesh-core-proxy-privkey: &mesh-core-proxy-privkey
+  mode: 0440
+  source: mesh_core_proxy_privkey
+  target: consul_server_privkey.pem
+# VAULT
+x-mesh-core-vault: &mesh-core-vault
+  mode: 0444
+  source: mesh_core_vault
+  target: consul_server.pem
+x-mesh-core-vault-privkey: &mesh-core-vault-privkey
+  mode: 0440
+  source: mesh_core_vault_privkey
+  target: consul_server_privkey.pem
+
+
+### services ###
+x-service-defaults: &service-defaults
+  cpu_count: 2
+  cpu_shares: 1024
+  domainname: nirv.ai
+  init: true
+  # platform: linux/amd64
+  privileged: false
+  stop_grace_period: 5s
+  restart: unless-stopped
+
+x-service-healthcheck: &service-healthcheck
+  interval: 30s
+  retries: 5
+  start_period: 10s
+  timeout: 5s
+
+x-deploy: &service-deploy
+  mode: global
+  resources:
+    reservations:
+      cpus: ".10"
+      memory: "1gb"
+    limits:
+      cpus: ".50"
+      memory: "4gb"
+
+services:
+  core_consul:
+    <<: *service-defaults
+    deploy:
+      <<: *service-deploy
+    entrypoint: ./consul.compose.bootstrap.sh
+    env_file:
+      - ./.env
+      - ./apps/nirvai-core-consul/.env.consul
+    # network_mode: host
+    networks:
+      corenetwork:
+        aliases:
+          - ${MESH_HOSTNAME}
+          - ${MESH_SERVER_HOSTNAME}
+    ports:
+      - "${CONSUL_PORT_CUNT}:${CONSUL_PORT_CUNT}/tcp"
+      - "${CONSUL_PORT_SERF_LAN}:${CONSUL_PORT_SERF_LAN}/tcp"
+      - "${CONSUL_PORT_SERF_WAN}:${CONSUL_PORT_SERF_WAN}/tcp"
+      - "${CONSUL_PORT_DNS}:${CONSUL_PORT_DNS}/tcp"
+      - "${CONSUL_PORT_DNS}:${CONSUL_PORT_DNS}/udp"
+    secrets:
+      - *mesh-ca
+      - *mesh-server
+      - *mesh-server-privkey
+    volumes:
+      - ./apps/nirvai-core-consul/src/config:/consul/config:rw,z
+      - ./apps/nirvai-core-consul/src/data:/consul/data:rw,z
+      - /var/run/docker.sock:/var/run/docker.sock:ro,z
+    ### build ###
+    image: ${REG_HOSTNAME}:${REG_PORT_HOST}/${COMPOSE_PROJECT_NAME}/core-consul:${ENV:?environment is required}
+    build:
+      args:
+        CONSUL_UID:
+        CONSUL_GID:
+      context: ./apps/nirvai-core-consul/src
+      dockerfile: ./consul.compose.Dockerfile
+
+  core_proxy:
+    <<: *service-defaults
+    deploy:
+      <<: *service-deploy
+    healthcheck:
+      <<: *service-healthcheck
+      test: "curl -f -H 'user-agent: just stopping by and wanted to say hello'  https://${PROJECT_HOSTNAME}:${PROXY_PORT_STATS}/health || exit $?"
+    entrypoint: ./haproxy.compose.bootstrap.sh
+    env_file:
+      - ./.env
+    networks:
+      corenetwork:
+        aliases:
+          - ${PROJECT_HOSTNAME} # proxy is the entrypoint to the project
+          - core_proxy
+    ports:
+      - "${CONSUL_PORT_CUNT}/tcp"
+      - "${CONSUL_PORT_DNS}/tcp"
+      - "${CONSUL_PORT_DNS}/udp"
+      - "${CONSUL_PORT_SERF_LAN}/tcp"
+      - "${CONSUL_PORT_SERF_WAN}/tcp"
+      - "${PROXY_PORT_STATS}:${PROXY_PORT_STATS}"
+      - "${PROXY_PORT_VAULT}:${PROXY_PORT_VAULT}"
+    secrets:
+      - *host-combined
+      - *mesh-ca
+      - *mesh-core-proxy
+      - *mesh-core-proxy-privkey
+    volumes:
+      - ./apps/nirvai-core-proxy/src/haproxy:/usr/local/etc/haproxy:ro
+      - ./apps/nirvai-core-proxy/src/consul/config:/consul/config:rw,z
+      - ./apps/nirvai-core-proxy/src/consul/data:/consul/data:rw,z
+      - /var/run/docker.sock:/var/run/docker.sock:ro,z
+    ### build ###
+    image: ${REG_HOSTNAME}:${REG_PORT_HOST}/${COMPOSE_PROJECT_NAME}/core-proxy:${ENV:?environment is required}
+    build:
+      args:
+        CONSUL_UID:
+        CONSUL_GID:
+      context: ./apps/nirvai-core-proxy/src
+      dockerfile: ./haproxy.compose.Dockerfile
+
+  core_vault:
+    <<: *service-defaults
+    cap_add:
+      - IPC_LOCK
+    deploy:
+      <<: *service-deploy
+    entrypoint: ./vault.compose.bootstrap.sh
+    env_file:
+      - ./.env
+      - ./apps/nirvai-core-vault/.env.vault
+    networks:
+      corenetwork:
+        aliases:
+          - ${VAULT_HOSTNAME}
+    ports:
+      - "${CONSUL_PORT_CUNT}/tcp"
+      - "${CONSUL_PORT_DNS}/tcp"
+      - "${CONSUL_PORT_DNS}/udp"
+      - "${CONSUL_PORT_SERF_LAN}/tcp"
+      - "${CONSUL_PORT_SERF_WAN}/tcp"
+      - "${VAULT_PORT_CUNT}:${VAULT_PORT_CUNT}"
+    secrets:
+      - *host-fullchain
+      - *host-privkey
+      - *mesh-ca
+      - *mesh-core-vault
+      - *mesh-core-vault-privkey
+    volumes:
+      - ./apps/nirvai-core-vault/src/consul/config:/consul/config:rw,z
+      - ./apps/nirvai-core-vault/src/consul/data:/consul/data:rw,z
+      - ./apps/nirvai-core-vault/src/vault/config:/vault/config
+      - ./apps/nirvai-core-vault/src/vault/data:/vault/data
+    ### build ###
+    image: ${REG_HOSTNAME}:${REG_PORT_HOST}/${COMPOSE_PROJECT_NAME}/core-vault:${ENV:?environment is required}
+    build:
+      args:
+        CONSUL_UID:
+        CONSUL_GID:
+      context: ./apps/nirvai-core-vault/src
+      dockerfile: ./vault.compose.Dockerfile
+
+networks:
+  corenetwork:
+    attachable: true
+
+secrets:
+  nirvai_cert:
+    file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/cert.pem"
+  nirvai_chain:
+    file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/chain.pem"
+  nirvai_combined:
+    file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/combined.pem"
+  nirvai_privkey:
+    file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/privkey.pem"
+  nirvai_fullchain:
+    file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/fullchain.pem"
+  mesh_ca:
+    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/ca.pem"
+  mesh_server:
+    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/server-0.pem"
+  mesh_server_privkey:
+    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/server-0-key.pem"
+  mesh_core_proxy:
+    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-proxy.pem"
+  mesh_core_proxy_privkey:
+    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-proxy-key.pem"
+  mesh_core_vault:
+    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-vault.pem"
+  mesh_core_vault_privkey:
+    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-vault-key.pem"
