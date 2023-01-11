@@ -1,20 +1,17 @@
 {
-    "CN": "mesh.nirv.ai",
-    "hosts": [
-      "127.0.0.1",
-      "localhost"
-    ],
-    "key": {
-      "algo": "ecdsa",
-      "size": 256
-    },
-    "names": [
-        {
-          "C": "US",
-          "L": "pacific",
-          "O": "nirv ai",
-          "OU": "Website",
-          "ST": "ocean"
-        }
-    ]
+  "CN": "mesh.nirv.ai",
+  "hosts": [],
+  "key": {
+    "algo": "ecdsa",
+    "size": 256
+  },
+  "names": [
+    {
+      "C": "US",
+      "L": "pacific",
+      "O": "nirv ai",
+      "OU": "Website",
+      "ST": "ocean"
+    }
+  ]
 }
