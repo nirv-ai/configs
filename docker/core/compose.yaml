@@ -211,26 +211,26 @@ networks:
 
 secrets:
   nirvai_cert:
-    file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/cert.pem"
+    file: "${CERTS_DIR_HOST}/${PROJECT_HOSTNAME}/cert.pem"
   nirvai_chain:
-    file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/chain.pem"
+    file: "${CERTS_DIR_HOST}/${PROJECT_HOSTNAME}/chain.pem"
   nirvai_combined:
-    file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/combined.pem"
+    file: "${CERTS_DIR_HOST}/${PROJECT_HOSTNAME}/combined.pem"
   nirvai_privkey:
-    file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/privkey.pem"
+    file: "${CERTS_DIR_HOST}/${PROJECT_HOSTNAME}/privkey.pem"
   nirvai_fullchain:
-    file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/fullchain.pem"
+    file: "${CERTS_DIR_HOST}/${PROJECT_HOSTNAME}/fullchain.pem"
   mesh_ca:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/ca.pem"
+    file: "${CERTS_DIR_HOST}/${ENV}/${MESH_HOSTNAME}/ca.pem"
   mesh_server:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/server-0.pem"
+    file: "${CERTS_DIR_HOST}/${ENV}/${MESH_HOSTNAME}/server-0.pem"
   mesh_server_privkey:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/server-0-key.pem"
+    file: "${CERTS_DIR_HOST}/${ENV}/${MESH_HOSTNAME}/server-0-key.pem"
   mesh_core_proxy:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-proxy.pem"
+    file: "${CERTS_DIR_HOST}/${ENV}/${MESH_HOSTNAME}/core-proxy.pem"
   mesh_core_proxy_privkey:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-proxy-key.pem"
+    file: "${CERTS_DIR_HOST}/${ENV}/${MESH_HOSTNAME}/core-proxy-key.pem"
   mesh_core_vault:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-vault.pem"
+    file: "${CERTS_DIR_HOST}/${ENV}/${MESH_HOSTNAME}/core-vault.pem"
   mesh_core_vault_privkey:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-vault-key.pem"
+    file: "${CERTS_DIR_HOST}/${ENV}/${MESH_HOSTNAME}/core-vault-key.pem"
