@@ -7,11 +7,12 @@
   },
   "names": [
     {
-      "C": "US",
-      "L": "pacific",
-      "O": "nirv ai",
-      "OU": "Website",
-      "ST": "ocean"
+      "EM": "contact@nirvai.mozmail.com",
+      "OU": "platform",
+      "O": "nirv.ai",
+      "L": "internet",
+      "ST": "california",
+      "C": "us"
     }
   ]
 }
