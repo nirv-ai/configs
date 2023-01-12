@@ -24,3 +24,12 @@
 
 - [haproxy community modules](./haproxy/modules/)
 - [reference development configs](./haproxy/configs)
+
+## cfssl
+
+- [cfssl default configuration](./cfssl/cfssl.json)
+- [mesh.nirv.ai: root ca and cert configuration](./cfssl/mesh.nirv.ai/)
+
+## docker
+
+- [core: development dockerfiles](./docker/core/)
