@@ -1,0 +1,23 @@
+{
+  "CN": "mesh.nirv.ai",
+  "hosts": [
+    "127.0.0.1",
+    "localhost",
+    "mesh.nirv.ai",
+    "server.us-east.mesh.nirv.ai"
+  ],
+  "key": {
+    "algo": "ecdsa",
+    "size": 256
+  },
+  "names": [
+    {
+      "EM": "contact@nirvai.mozmail.com",
+      "OU": "server",
+      "O": "nirv.ai",
+      "L": "internet",
+      "ST": "california",
+      "C": "us"
+    }
+  ]
+}

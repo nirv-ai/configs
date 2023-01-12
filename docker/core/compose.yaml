@@ -4,7 +4,7 @@ name: ${COMPOSE_PROJECT_NAME}
 x-nirvai-cert: &host-cert
   mode: 0444
   source: nirvai_cert
-  target: host_cert.pem
+  target: project_combined.pem
 x-nirvai-chain: &host-chain
   mode: 0444
   source: nirvai_chain
@@ -24,7 +24,7 @@ x-nirvai-fullchain: &host-fullchain
 
 
 ### ${MESH_HOSTNAME} ###
-# SERVER
+# CONSUL
 x-mesh-ca: &mesh-ca
   mode: 0444
   source: mesh_ca
@@ -85,7 +85,7 @@ x-deploy: &service-deploy
       memory: "4gb"
 
 services:
-  core_consul:
+  consul:
     <<: *service-defaults
     deploy:
       <<: *service-deploy
@@ -93,7 +93,7 @@ services:
     env_file:
       - ./.env
       - ./apps/nirvai-core-consul/.env.consul
-    # network_mode: host
+    hostname: ${CONSUL_HOSTNAME}
     networks:
       corenetwork:
         aliases:
@@ -122,7 +122,7 @@ services:
       context: ./apps/nirvai-core-consul/src
       dockerfile: ./consul.compose.Dockerfile
 
-  core_proxy:
+  core-proxy:
     <<: *service-defaults
     deploy:
       <<: *service-deploy
@@ -132,11 +132,11 @@ services:
     entrypoint: ./haproxy.compose.bootstrap.sh
     env_file:
       - ./.env
+    hostname: ${PROXY_HOSTNAME}
     networks:
       corenetwork:
         aliases:
           - ${PROJECT_HOSTNAME} # proxy is the entrypoint to the project
-          - core_proxy
     ports:
       - "${CONSUL_PORT_CUNT}/tcp"
       - "${CONSUL_PORT_DNS}/tcp"
@@ -164,7 +164,7 @@ services:
       context: ./apps/nirvai-core-proxy/src
       dockerfile: ./haproxy.compose.Dockerfile
 
-  core_vault:
+  core-vault:
     <<: *service-defaults
     cap_add:
       - IPC_LOCK
@@ -174,10 +174,9 @@ services:
     env_file:
       - ./.env
       - ./apps/nirvai-core-vault/.env.vault
+    hostname: ${VAULT_HOSTNAME}
     networks:
       corenetwork:
-        aliases:
-          - ${VAULT_HOSTNAME}
     ports:
       - "${CONSUL_PORT_CUNT}/tcp"
       - "${CONSUL_PORT_DNS}/tcp"
@@ -211,26 +210,26 @@ networks:
 
 secrets:
   nirvai_cert:
-    file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/cert.pem"
+    file: "${CERTS_DIR_HOST}/${PROJECT_HOSTNAME}/cert.pem"
   nirvai_chain:
-    file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/chain.pem"
+    file: "${CERTS_DIR_HOST}/${PROJECT_HOSTNAME}/chain.pem"
   nirvai_combined:
-    file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/combined.pem"
+    file: "${CERTS_DIR_HOST}/${PROJECT_HOSTNAME}/combined.pem"
   nirvai_privkey:
-    file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/privkey.pem"
+    file: "${CERTS_DIR_HOST}/${PROJECT_HOSTNAME}/privkey.pem"
   nirvai_fullchain:
-    file: "${CERTS_HOST_DIR}/${PROJECT_HOSTNAME}/fullchain.pem"
+    file: "${CERTS_DIR_HOST}/${PROJECT_HOSTNAME}/fullchain.pem"
   mesh_ca:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/ca.pem"
+    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/ca.pem"
   mesh_server:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/server-0.pem"
+    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/server-0.pem"
   mesh_server_privkey:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/server-0-key.pem"
+    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/server-0-key.pem"
   mesh_core_proxy:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-proxy.pem"
+    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/core-proxy.pem"
   mesh_core_proxy_privkey:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-proxy-key.pem"
+    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/core-proxy-key.pem"
   mesh_core_vault:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-vault.pem"
+    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/core-vault.pem"
   mesh_core_vault_privkey:
-    file: "${CERTS_HOST_DIR}/${ENV}/${MESH_HOSTNAME}/core-vault-key.pem"
+    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/core-vault-key.pem"

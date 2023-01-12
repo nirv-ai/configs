@@ -1,6 +1,6 @@
 service {
-  name = "core-proxy"
-  id = "core-proxy-1"
+  name = "core-vault"
+  id = "core-vault-1"
   tags = ["v1"]
   port = 8300
 
