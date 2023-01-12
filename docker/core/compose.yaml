@@ -85,7 +85,7 @@ x-deploy: &service-deploy
       memory: "4gb"
 
 services:
-  consul:
+  core-consul:
     <<: *service-defaults
     deploy:
       <<: *service-deploy
@@ -99,8 +99,9 @@ services:
         aliases:
           - ${MESH_HOSTNAME}
           - ${MESH_SERVER_HOSTNAME}
+          - consul
     ports:
-      - "${CONSUL_PORT_CUNT}:${CONSUL_PORT_CUNT}/tcp"
+      - "${CONSUL_PORT_CUNT}:${CONSUL_PORT_CUNT}"
       - "${CONSUL_PORT_SERF_LAN}:${CONSUL_PORT_SERF_LAN}/tcp"
       - "${CONSUL_PORT_SERF_WAN}:${CONSUL_PORT_SERF_WAN}/tcp"
       - "${CONSUL_PORT_DNS}:${CONSUL_PORT_DNS}/tcp"
@@ -226,10 +227,10 @@ secrets:
   mesh_server_privkey:
     file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/server-0-key.pem"
   mesh_core_proxy:
-    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/core-proxy.pem"
+    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/server-1.pem"
   mesh_core_proxy_privkey:
-    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/core-proxy-key.pem"
+    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/server-1-key.pem"
   mesh_core_vault:
-    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/core-vault.pem"
+    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/server-2.pem"
   mesh_core_vault_privkey:
-    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/core-vault-key.pem"
+    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/server-2-key.pem"
