@@ -1,1 +1,0 @@
-datacenter = "us-east"

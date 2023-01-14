@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo "intiating consul agent"
-su -g consul - consul sh -c "consul agent -node=core-proxy -config-dir=/consul/config" &
+su -g consul - consul sh -c "consul agent -node=core-proxy -config-dir=/opt/consul/config" &
 echo "consul success?: $?"
 echo $! >/consul/pid.consul
 echo "consul pid saved: : $(cat /consul/pid.consul)"

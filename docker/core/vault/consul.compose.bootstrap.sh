@@ -2,7 +2,7 @@
 
 # FYI: alpine doesnt have su -g groupname, so we just set user
 echo "intiating consul agent"
-su - consul sh -c "consul agent -node=core-vault -config-dir=/consul/config" &
+su - consul sh -c "consul agent -node=core-vault -config-dir=/opt/consul/config" &
 echo "consul success?: $?"
 echo $! >/consul/pid.consul
 echo "consul pid saved: : $(cat /consul/pid.consul)"
