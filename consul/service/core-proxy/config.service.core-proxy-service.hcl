@@ -10,16 +10,26 @@ service {
     }
   }
 
-  check {
-    id =  "check-self",
-    name = "core-proxy",
-    service_id = "core-proxy-1",
-    args = [
-      "/bin/sh",
-      "-c",
-      "curl -kf -H 'user-agent: just stopping by and wanted to say hello'  https://localhost:8404/health || exit $?"
-    ]
-    interval = "5s",
-    timeout = "1s"
-  }
+  checks =  [
+    {
+      id =  "check-self-edge",
+      name = "core-proxy",
+      service_id = "core-proxy-1",
+      tcp = "localhost:8080"
+      interval = "5s",
+      timeout = "1s"
+    },
+    {
+      id =  "check-self-stats",
+      name = "core-proxy",
+      service_id = "core-proxy-1",
+      interval = "30s",
+      timeout = "1s",
+      args = [
+        "/bin/sh",
+        "-c",
+        "curl -kf -H 'user-agent: just stopping by and wanted to say hello'  https://localhost:8404/health || exit $?"
+      ]
+    }
+  ]
 }

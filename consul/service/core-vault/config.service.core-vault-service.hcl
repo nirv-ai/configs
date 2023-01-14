@@ -2,7 +2,7 @@ service {
   name = "core-vault"
   id = "core-vault-1"
   tags = ["v1", "mesh"]
-  port = 8080
+  port = 8200
 
   connect {
     sidecar_service {

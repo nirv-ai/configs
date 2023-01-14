@@ -1,6 +1,8 @@
 tls {
   internal_rpc {
     verify_server_hostname = true
+    verify_incoming = true
+    verify_outgoing = true
   }
 
   defaults {
@@ -8,7 +10,7 @@ tls {
     cert_file = "/run/secrets/consul_server.pem"
     key_file  = "/run/secrets/consul_server_privkey.pem"
 
-    verify_incoming        = true
+    verify_incoming        = false # TODO: still breaks the fkn UI; dunno
     verify_outgoing        = true
   }
 }
