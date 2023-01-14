@@ -22,7 +22,6 @@ x-nirvai-fullchain: &host-fullchain
   source: nirvai_fullchain
   target: host_fullchain.pem
 
-
 ### ${MESH_HOSTNAME} ###
 # CONSUL
 x-mesh-ca: &mesh-ca
@@ -56,14 +55,12 @@ x-mesh-core-vault-privkey: &mesh-core-vault-privkey
   source: mesh_core_vault_privkey
   target: consul_server_privkey.pem
 
-
 ### services ###
 x-service-defaults: &service-defaults
   cpu_count: 2
   cpu_shares: 1024
   domainname: nirv.ai
   init: true
-  # platform: linux/amd64
   privileged: false
   stop_grace_period: 5s
   restart: unless-stopped
@@ -81,8 +78,8 @@ x-deploy: &service-deploy
       cpus: ".10"
       memory: "1gb"
     limits:
-      cpus: ".50"
-      memory: "4gb"
+      cpus: ".25"
+      memory: "2gb"
 
 services:
   core-consul:
@@ -133,19 +130,15 @@ services:
     entrypoint: ./haproxy.compose.bootstrap.sh
     env_file:
       - ./.env
+      - ./apps/nirvai-core-proxy/.env
     hostname: ${PROXY_HOSTNAME}
     networks:
       corenetwork:
         aliases:
           - ${PROJECT_HOSTNAME} # proxy is the entrypoint to the project
     ports:
-      - "${CONSUL_PORT_CUNT}/tcp"
-      - "${CONSUL_PORT_DNS}/tcp"
-      - "${CONSUL_PORT_DNS}/udp"
-      - "${CONSUL_PORT_SERF_LAN}/tcp"
-      - "${CONSUL_PORT_SERF_WAN}/tcp"
+      - "${PROXY_PORT_EDGE}:${PROXY_PORT_EDGE}"
       - "${PROXY_PORT_STATS}:${PROXY_PORT_STATS}"
-      - "${PROXY_PORT_VAULT}:${PROXY_PORT_VAULT}"
     secrets:
       - *host-combined
       - *mesh-ca
@@ -154,6 +147,7 @@ services:
     volumes:
       - ./apps/nirvai-core-proxy/src/haproxy:/usr/local/etc/haproxy:ro
       - ./apps/nirvai-core-proxy/src/consul/config:/consul/config:rw,z
+      - ./apps/nirvai-core-proxy/src/consul/envoy:/consul/envoy:rw,z
       - ./apps/nirvai-core-proxy/src/consul/data:/consul/data:rw,z
       - /var/run/docker.sock:/var/run/docker.sock:ro,z
     ### build ###
@@ -179,11 +173,6 @@ services:
     networks:
       corenetwork:
     ports:
-      - "${CONSUL_PORT_CUNT}/tcp"
-      - "${CONSUL_PORT_DNS}/tcp"
-      - "${CONSUL_PORT_DNS}/udp"
-      - "${CONSUL_PORT_SERF_LAN}/tcp"
-      - "${CONSUL_PORT_SERF_WAN}/tcp"
       - "${VAULT_PORT_CUNT}:${VAULT_PORT_CUNT}"
     secrets:
       - *host-fullchain
