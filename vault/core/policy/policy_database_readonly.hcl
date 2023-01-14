@@ -1,3 +1,3 @@
 path "database/creds/readonly" {
-  capabilities = [ "read" ]
+  capabilities = ["read"]
 }

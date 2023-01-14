@@ -1,3 +1,3 @@
 path "database/creds/readwrite" {
-  capabilities = [ "read" ]
+  capabilities = ["read"]
 }
