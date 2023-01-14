@@ -1,6 +1,6 @@
 acl {
   tokens {
-    agent  = "67a2c746-f380-ffd3-60a4-93d60cbde2dd"
-    default  = "67a2c746-f380-ffd3-60a4-93d60cbde2dd"
+    agent  = "140a5c08-f5dd-b5de-573a-5798986e88f2"
+    default  = "140a5c08-f5dd-b5de-573a-5798986e88f2"
   }
 }

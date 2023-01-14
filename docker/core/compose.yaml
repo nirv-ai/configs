@@ -66,9 +66,9 @@ x-service-defaults: &service-defaults
   restart: unless-stopped
 
 x-service-healthcheck: &service-healthcheck
-  interval: 30s
+  interval: 10s
   retries: 5
-  start_period: 10s
+  start_period: 5s
   timeout: 5s
 
 x-deploy: &service-deploy
@@ -131,11 +131,11 @@ services:
     env_file:
       - ./.env
       - ./apps/nirvai-core-proxy/.env
+    extra_hosts:
+      - ${PROJECT_HOSTNAME}:127.0.0.1
     hostname: ${PROXY_HOSTNAME}
     networks:
       corenetwork:
-        aliases:
-          - ${PROJECT_HOSTNAME} # proxy is the entrypoint to the project
     ports:
       - "${PROXY_PORT_EDGE}:${PROXY_PORT_EDGE}"
       - "${PROXY_PORT_STATS}:${PROXY_PORT_STATS}"
@@ -147,7 +147,7 @@ services:
     volumes:
       - ./apps/nirvai-core-proxy/src/haproxy:/usr/local/etc/haproxy:ro
       - ./apps/nirvai-core-proxy/src/consul/config:/consul/config:rw,z
-      - ./apps/nirvai-core-proxy/src/consul/envoy:/consul/envoy:rw,z
+      - ./apps/nirvai-core-proxy/src/consul/envoy:/consul/envoy:ro,z
       - ./apps/nirvai-core-proxy/src/consul/data:/consul/data:rw,z
       - /var/run/docker.sock:/var/run/docker.sock:ro,z
     ### build ###
@@ -168,7 +168,12 @@ services:
     entrypoint: ./vault.compose.bootstrap.sh
     env_file:
       - ./.env
-      - ./apps/nirvai-core-vault/.env.vault
+      - ./apps/nirvai-core-vault/.env
+    extra_hosts:
+      - ${PROJECT_HOSTNAME}:127.0.0.1
+    healthcheck:
+      <<: *service-healthcheck
+      test: "curl https://${PROJECT_HOSTNAME}:${VAULT_PORT_CUNT}/v1/sys/health || exit $?"
     hostname: ${VAULT_HOSTNAME}
     networks:
       corenetwork:
@@ -183,6 +188,7 @@ services:
     volumes:
       - ./apps/nirvai-core-vault/src/consul/config:/consul/config:rw,z
       - ./apps/nirvai-core-vault/src/consul/data:/consul/data:rw,z
+      - ./apps/nirvai-core-vault/src/consul/envoy:/consul/envoy:ro,z
       - ./apps/nirvai-core-vault/src/vault/config:/vault/config
       - ./apps/nirvai-core-vault/src/vault/data:/vault/data
     ### build ###
