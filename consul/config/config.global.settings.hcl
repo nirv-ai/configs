@@ -1,7 +1,7 @@
-// datacenter = "us-east" # allow others to set this, check primary data_center for main
-// alt_domain = "localhost" # might be useful
+// alt_domain = "some.thing.else" # TODO might be useful, dunno
 auto_reload_config = true
 data_dir = "/opt/consul/data"
+datacenter = "us-east"
 default_query_time = "100s"
 disable_http_unprintable_char_filter = false
 disable_keyring_file = true # complete immutability
@@ -17,7 +17,7 @@ enable_script_checks = true
 encrypt_verify_incoming = true
 encrypt_verify_outgoing = true
 log_level = "INFO"
-max_query_time = = "300s"
+max_query_time = "300s"
 pid_file = "/opt/consul/pid.consul"
 primary_datacenter = "us-east"
 reconnect_timeout = "72h"

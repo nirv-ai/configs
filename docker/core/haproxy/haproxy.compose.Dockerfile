@@ -20,13 +20,13 @@ ARG CONSUL_UID
 ENV HASHICORP_RELEASES=https://releases.hashicorp.com
 RUN groupadd -r -g $CONSUL_GID consul && \
     useradd -ms /bin/sh -g consul -u $CONSUL_UID consul
-RUN mkdir -p /consul/data && \
-    mkdir -p /consul/config && \
-    chown -R consul:consul /consul
+RUN mkdir -p /opt/consul/data && \
+    mkdir -p /opt/consul/config && \
+    chown -R consul:consul /opt/consul
 RUN curl "${HASHICORP_RELEASES}/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip" -Lo /tmp/consul.zip && \
   unzip /tmp/consul.zip -d /usr/bin
 RUN test -e /etc/nsswitch.conf || echo 'hosts: files dns' > /etc/nsswitch.conf
-COPY --chown=consul:consul ./consul/consul.compose.bootstrap.sh ./consul
+COPY --chown=consul:consul ./consul/consul.compose.bootstrap.sh ./opt/consul
 
 ## envoy
 ENV ENVOY_VERSION_STRING=1.24.1

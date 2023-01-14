@@ -1,5 +1,4 @@
-# todo: should be set by nomad
-# and appropriate for the env we're deploying to
+# TODO: should be set by nomad
 performance {
   raft_multiplier = 3
   leave_drain_time = "5s"

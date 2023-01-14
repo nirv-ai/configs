@@ -4,5 +4,5 @@ autopilot {
   last_contact_threshold = "1s"
   max_trailing_logs = 500
   min_quorum = 0
-  server_stabalization_time = "30s"
+  server_stabilization_time = "30s"
 }

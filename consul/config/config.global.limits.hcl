@@ -1,6 +1,5 @@
-# todo: should be set by nomad
-# and should fit the env we're deploying to
-{
+# TODO: should be set by nomad
+limits {
   http_max_conns_per_client = 200
   https_handshake_timeout = "1s"
   rpc_client_timeout = "60s"

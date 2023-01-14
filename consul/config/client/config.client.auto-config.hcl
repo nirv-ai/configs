@@ -1,4 +1,5 @@
 # TODO https://developer.hashicorp.com/consul/docs/agent/config/config-files#auto_config
-auto_config {
-  enabled = true
-}
+# requires intro token to be set and imsure of sideeffects on security
+// auto_config {
+//   enabled = true
+// }
