@@ -1,7 +1,9 @@
-service {
+# always use services so you can declare multiple instances
+# start index at 1 as thats what docker uses
+services {
   name = "core-vault"
   id   = "core-vault-1"
-  tags = ["v1", "mesh"]
+  tags = ["primary", "mesh"]
   port = 8200
 
   connect {
