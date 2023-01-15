@@ -1,4 +1,4 @@
-alt_domain = "search" # @see https://developer.hashicorp.com/consul/docs/discovery/dns#alternative-domain
+alt_domain                           = "search" # @see https://developer.hashicorp.com/consul/docs/discovery/dns#alternative-domain
 auto_reload_config                   = true
 data_dir                             = "/opt/consul/data"
 datacenter                           = "us-east"

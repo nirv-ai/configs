@@ -108,8 +108,8 @@ services:
       - *mesh-server
       - *mesh-server-privkey
     volumes:
-      - ./apps/nirvai-core-consul/src/config:/opt/consul/config:rw,z
-      - ./apps/nirvai-core-consul/src/data:/opt/consul/data:rw,z
+      - ./apps/nirvai-core-consul/src/consul/config:/opt/consul/config:rw,z
+      - ./apps/nirvai-core-consul/src/consul/data:/opt/consul/data:rw,z
       - /var/run/docker.sock:/var/run/docker.sock:ro,z
     ### build ###
     image: ${REG_HOSTNAME}:${REG_PORT_HOST}/${COMPOSE_PROJECT_NAME}/core-consul:${ENV:?environment is required}
@@ -145,10 +145,10 @@ services:
       - *mesh-core-proxy
       - *mesh-core-proxy-privkey
     volumes:
-      - ./apps/nirvai-core-proxy/src/haproxy:/usr/local/etc/haproxy:ro
       - ./apps/nirvai-core-proxy/src/consul/config:/opt/consul/config:rw,z
-      - ./apps/nirvai-core-proxy/src/consul/envoy:/opt/consul/envoy:ro,z
       - ./apps/nirvai-core-proxy/src/consul/data:/opt/consul/data:rw,z
+      - ./apps/nirvai-core-proxy/src/consul/envoy:/opt/consul/envoy:ro,z
+      - ./apps/nirvai-core-proxy/src/haproxy:/usr/local/etc/haproxy:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro,z
     ### build ###
     image: ${REG_HOSTNAME}:${REG_PORT_HOST}/${COMPOSE_PROJECT_NAME}/core-proxy:${ENV:?environment is required}

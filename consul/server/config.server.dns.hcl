@@ -3,7 +3,7 @@ dns_config {
   max_stale = "10s"
   node_ttl = "60s"
   service_ttl {
-    * = "60s"
+    "*" = "60s"
   }
   enable_truncate = true
   only_passing = false # TODO: maybe set to true check the docs for FYI?
