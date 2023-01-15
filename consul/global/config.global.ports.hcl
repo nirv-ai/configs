@@ -9,6 +9,6 @@ ports {
   serf_lan         = 8301
   serf_wan         = 8302
   server           = 8300
-  sidecar_max_port = 0
-  sidecar_min_port = 0
+  sidecar_max_port = 21255
+  sidecar_min_port = 21000
 }
