@@ -89,7 +89,7 @@ services:
     entrypoint: ./consul.compose.bootstrap.sh
     env_file:
       - ./.env
-      - ./apps/nirvai-core-consul/.env.consul
+      - ./apps/nirvai-core-consul/.env
     hostname: ${CONSUL_HOSTNAME}
     networks:
       corenetwork:
