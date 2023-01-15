@@ -1,16 +1,12 @@
 # always use services so you can declare multiple instances
 # start index at 1 as thats what docker uses
 services {
-  name = "core-vault"
-  id   = "core-vault-1"
-  tags = ["primary", "mesh"]
-  port = 8200
+  enable_tag_override = false
+  id                  = "core-vault-1"
+  name                = "core-vault"
+  port                = 8200
+  tags                = ["primary", "mesh"]
 
-  connect {
-    sidecar_service {
-      port = 7979 # you need to manually start envoy, see bootstrap.sh
-    }
-  }
 
   check {
     id         = "check-self"
@@ -23,5 +19,15 @@ services {
     ]
     interval = "5s"
     timeout  = "1s"
+  }
+
+  connect {
+    sidecar_service {
+      port = 21000 # you need to manually start envoy, see bootstrap.sh
+    }
+  }
+
+  meta {
+    app = "core-vault"
   }
 }

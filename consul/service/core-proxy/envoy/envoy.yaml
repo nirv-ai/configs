@@ -4,5 +4,5 @@ static_resources:
       address:
         socket_address:
           address: 127.0.0.1
-          port_value: 7979
+          port_value: 21000
       filter_chains: [{}]
