@@ -2,7 +2,7 @@
 
 FROM haproxytech/haproxy-ubuntu:2.7.1 AS haproxy_build
 
-######################### consul & envoy
+######################### consul, consul-template & envoy
 ## consul
 # removed su-exec, iputils
 RUN \
@@ -27,6 +27,15 @@ RUN curl "${HASHICORP_RELEASES}/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION
   unzip /tmp/consul.zip -d /usr/bin
 RUN test -e /etc/nsswitch.conf || echo 'hosts: files dns' > /etc/nsswitch.conf
 COPY --chown=consul:consul ./consul/consul.compose.bootstrap.sh ./opt/consul
+
+## consul template
+# @see https://releases.hashicorp.com/consul-template
+ENV CT_VER=0.30.0
+
+RUN \
+  curl "${HASHICORP_RELEASES}/consul-template/${CT_VER}/consul-template_${CT_VER}_linux_amd64.zip" -Lo /tmp/ct.zip && \
+  unzip /tmp/ct.zip -d /usr/local/bin && \
+  rm /tmp/ct.zip
 
 ## envoy
 ENV ENVOY_VERSION_STRING=1.24.1
