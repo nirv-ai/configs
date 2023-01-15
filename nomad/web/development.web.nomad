@@ -104,11 +104,11 @@ variable "services" {
       hostname       = string
       image          = string
       environment = object({
-        WEB_BFF_PORT              = string
+        WEB_BFF_PORT          = string
         BFF_APP_ROLE          = string
         BFF_DB_CORE_ROLE      = string
         NODE_ENV              = string
-        WEB_POSTGRES_PORT  = string
+        WEB_POSTGRES_PORT     = string
         WEB_POSTGRES_HOSTNAME = string
         PROJECT_HOSTNAME      = string
         PROJECT_NAME          = string
@@ -340,11 +340,11 @@ job "dev_core" {
       }
 
       env {
-        WEB_BFF_PORT              = "${local.bffenv.WEB_BFF_PORT}"
+        WEB_BFF_PORT          = "${local.bffenv.WEB_BFF_PORT}"
         BFF_APP_ROLE          = "${local.bffenv.BFF_APP_ROLE}"
         BFF_DB_CORE_ROLE      = "${local.bffenv.BFF_DB_CORE_ROLE}"
         NODE_ENV              = "${local.bffenv.NODE_ENV}"
-        WEB_POSTGRES_PORT  = "${local.bffenv.WEB_POSTGRES_PORT}"
+        WEB_POSTGRES_PORT     = "${local.bffenv.WEB_POSTGRES_PORT}"
         WEB_POSTGRES_HOSTNAME = "${local.bffenv.WEB_POSTGRES_HOSTNAME}"
         PROJECT_HOSTNAME      = "${local.bffenv.PROJECT_HOSTNAME}"
         PROJECT_NAME          = "${local.bffenv.PROJECT_NAME}"

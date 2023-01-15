@@ -1,6 +1,6 @@
 service {
   name = "core-vault"
-  id = "core-vault-1"
+  id   = "core-vault-1"
   tags = ["v1", "mesh"]
   port = 8200
 
@@ -11,15 +11,15 @@ service {
   }
 
   check {
-    id =  "check-self",
-    name = "core-vault",
-    service_id = "core-vault-1",
+    id         = "check-self"
+    name       = "core-vault"
+    service_id = "core-vault-1"
     args = [
       "/bin/sh",
       "-c",
       "curl https://dev.nirv.ai:8200/v1/sys/health || exit $?"
     ]
-    interval = "5s",
-    timeout = "1s"
+    interval = "5s"
+    timeout  = "1s"
   }
 }

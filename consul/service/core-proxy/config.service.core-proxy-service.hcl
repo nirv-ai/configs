@@ -1,6 +1,6 @@
 service {
   name = "core-proxy"
-  id = "core-proxy-1"
+  id   = "core-proxy-1"
   tags = ["v1", "mesh"]
   port = 8080
 
@@ -10,21 +10,21 @@ service {
     }
   }
 
-  checks =  [
+  checks = [
     {
-      id =  "check-self-edge",
-      name = "core-proxy",
+      id         = "check-self-edge",
+      name       = "core-proxy",
       service_id = "core-proxy-1",
-      tcp = "localhost:8080"
-      interval = "5s",
-      timeout = "1s"
+      tcp        = "localhost:8080"
+      interval   = "5s",
+      timeout    = "1s"
     },
     {
-      id =  "check-self-stats",
-      name = "core-proxy",
+      id         = "check-self-stats",
+      name       = "core-proxy",
       service_id = "core-proxy-1",
-      interval = "30s",
-      timeout = "1s",
+      interval   = "30s",
+      timeout    = "1s",
       args = [
         "/bin/sh",
         "-c",

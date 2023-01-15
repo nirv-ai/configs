@@ -1,7 +1,7 @@
-bootstrap_expect = 1
-client_addr = "127.0.0.1"
+bootstrap_expect    = 1
+client_addr         = "127.0.0.1"
 discovery_max_stale = "5s"
-server = true
+server              = true
 
 addresses {
   https = "0.0.0.0"

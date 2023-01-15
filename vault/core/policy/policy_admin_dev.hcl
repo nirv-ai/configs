@@ -1,4 +1,4 @@
 # POLICY PLACEHOLDER
 path "supa/dupa/fly/*" {
-  capabilities = [ "read", "update", "delete", "list" ]
+  capabilities = ["read", "update", "delete", "list"]
 }
