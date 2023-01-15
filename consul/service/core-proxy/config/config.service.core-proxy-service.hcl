@@ -8,6 +8,7 @@ services {
   port                = 8080
   tags                = ["primary", "mesh"]
 
+  # might as well always use checks
   checks = [
     {
       id         = "check-self-edge",
@@ -34,36 +35,41 @@ services {
 
 
   # @see https://developer.hashicorp.com/consul/docs/connect/registration/sidecar-service
+  # you need to manually start envoy, see bootstrap.sh
   connect {
-    # can any* field in a servcie definition field
     sidecar_service {
-      port = 21000 # you need to manually start envoy, see bootstrap.sh
+      # accepts any* field in a servcie definition field
+      port = 21000
+
       proxy {
         // mode                     = "direct"
 
         config = {}
         expose {
           checks = true
-          // paths = [
-          //   { # edge
-          //     local_path_port = 8080
-          //     listener_port   = 28080
-          //   },
-          //   { # stats
-          //     local_path_port = 8404
-          //     listener_port   = 28404
-          //   },
-          //   { # expose vault via haproxy
-          //     local_path_port = 8300
-          //     listener_port   = 28300
-          //   }
-          // ]
+          paths = [
+            { # edge
+              path            = "/"
+              local_path_port = 8080
+              listener_port   = 28080
+            },
+            { # stats
+              path            = "/stats"
+              local_path_port = 8404
+              listener_port   = 28404
+            },
+            { # expose vault via haproxy
+              path            = "/"
+              local_path_port = 8200
+              listener_port   = 28200
+            }
+          ]
         }
         upstreams = [
           {
             destination_name = "core-vault"
             destination_type = "service"
-            local_bind_port  = 8200 # todo: should point to the sidecar proxy
+            local_bind_port  = 8200 # todo: should point to the sidecar proxy ?
 
             config = {
               handshake_timeout_ms = 1000
