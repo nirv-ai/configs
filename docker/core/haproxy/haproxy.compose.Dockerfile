@@ -24,7 +24,8 @@ RUN mkdir -p /opt/consul/data && \
     mkdir -p /opt/consul/config && \
     chown -R consul:consul /opt/consul
 RUN curl "${HASHICORP_RELEASES}/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip" -Lo /tmp/consul.zip && \
-  unzip /tmp/consul.zip -d /usr/bin
+  unzip /tmp/consul.zip -d /usr/local/bin && \
+  rm /tmp/consul.zip
 RUN test -e /etc/nsswitch.conf || echo 'hosts: files dns' > /etc/nsswitch.conf
 COPY --chown=consul:consul ./consul/consul.compose.bootstrap.sh ./opt/consul
 
@@ -45,9 +46,20 @@ RUN curl -L https://func-e.io/install.sh | bash -s -- -b /usr/local/bin && \
     envoy --version
 
 ######################### haproxy
+ENV DP_VER=2.7.1
+ENV HAPROXY_DP_DL=https://github.com/haproxytech/dataplaneapi/releases/download
+
 RUN \
   mkdir -p -m 2750 /var/lib/haproxy && \
   chmod a-w /var/lib/haproxy
+
+# dataplane: the image we use already has dp
+# RUN \
+#   curl "${HAPROXY_DP_DL}/v${DP_VER}/dataplaneapi_${DP_VER}_Linux_x86_64.tar.gz" -Lo /tmp/dp.tar.gz && \
+#   tar -zxvf dp.tar.gz && \
+#   cp /tmp/build/dataplaneapi /usr/local/bin &&
+#   chmod +x /usr/local/bin/dataplaneapi && \
+#   rm -rf /tmp/*
 
 WORKDIR /usr/local/etc/haproxy
 

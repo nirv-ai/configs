@@ -90,7 +90,6 @@ services:
     env_file:
       - ./.env
       - ./apps/nirvai-core-consul/.env
-    hostname: ${CONSUL_HOSTNAME}
     networks:
       corenetwork:
         aliases:
@@ -133,12 +132,12 @@ services:
       - ./apps/nirvai-core-proxy/.env
     extra_hosts:
       - ${PROJECT_HOSTNAME}:127.0.0.1
-    hostname: ${PROXY_HOSTNAME}
     networks:
       corenetwork:
     ports:
       - "${PROXY_PORT_EDGE}:${PROXY_PORT_EDGE}"
       - "${PROXY_PORT_STATS}:${PROXY_PORT_STATS}"
+      - "${PROXY_PORT_VAULT}:${PROXY_PORT_VAULT}"
     secrets:
       - *host-combined
       - *mesh-ca
@@ -174,11 +173,10 @@ services:
     healthcheck:
       <<: *service-healthcheck
       test: "curl https://${PROJECT_HOSTNAME}:${VAULT_PORT_CUNT}/v1/sys/health || exit $?"
-    hostname: ${VAULT_HOSTNAME}
     networks:
       corenetwork:
     ports:
-      - "${VAULT_PORT_CUNT}:${VAULT_PORT_CUNT}"
+      - "8202:${VAULT_PORT_CUNT}"
     secrets:
       - *host-fullchain
       - *host-privkey

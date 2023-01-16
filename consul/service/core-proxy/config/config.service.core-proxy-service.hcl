@@ -37,14 +37,10 @@ services {
   # @see https://developer.hashicorp.com/consul/docs/connect/registration/sidecar-service
   # you need to manually start envoy, see bootstrap.sh
   connect {
+    # accepts any* field in a servcie definition field
     sidecar_service {
-      # accepts any* field in a servcie definition field
       port = 21000
-
       proxy {
-        // mode                     = "direct"
-
-        config = {}
         expose {
           checks = true
           paths = [
@@ -69,7 +65,7 @@ services {
           {
             destination_name = "core-vault"
             destination_type = "service"
-            local_bind_port  = 8200 # todo: should point to the sidecar proxy ?
+            local_bind_port  = 8200
 
             config = {
               handshake_timeout_ms = 1000
@@ -79,7 +75,6 @@ services {
             }
           }
         ]
-
       }
     }
   }

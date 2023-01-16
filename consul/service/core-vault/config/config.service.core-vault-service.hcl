@@ -27,13 +27,11 @@ services {
   # @see https://developer.hashicorp.com/consul/docs/connect/registration/sidecar-service
   # you need to manually start envoy, see bootstrap.sh
   connect {
+    # accepts any* field in a servcie definition field
     sidecar_service {
-      # accepts any* field in a servcie definition field
       port = 21000
 
       proxy {
-        config = {}
-
         expose {
           checks = true
 

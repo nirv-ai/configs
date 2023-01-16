@@ -18,14 +18,14 @@ EOF
 chown -R consul:consul /opt/consul
 
 # FYI: alpine doesnt have su -g groupname, so we just set user
-echo "intiating consul agent"
-su - consul sh -c "consul agent -node=core-vault -config-dir=/opt/consul/config" &
-echo "consul success?: $?"
-echo "consul pid saved: : $(cat /opt/consul/pid.consul)"
-
-# FYI: alpine doesnt have su -g groupname, so we just set user
 echo "starting envoy service"
 su - consul sh -c "cd /opt/consul/envoy && envoy -c envoy.yaml" &
 echo "envoy success?: $?"
 echo $! >/opt/consul/pid.envoy
 echo "envoy pid saved: $(cat /opt/consul/pid.envoy)"
+
+# FYI: alpine doesnt have su -g groupname, so we just set user
+echo "starting consul agent"
+su - consul sh -c "consul agent -node=core-vault -config-dir=/opt/consul/config" &
+echo "consul success?: $?"
+echo "consul pid saved: : $(cat /opt/consul/pid.consul)"
