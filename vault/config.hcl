@@ -16,8 +16,6 @@ storage "raft" {
   node_id = "node1"
 }
 
-
-# advertise the non-loopback interface
 api_addr     = "https://127.0.0.1:8300"
 cluster_addr = "https://127.0.0.1:8301"
 
@@ -27,15 +25,3 @@ listener "tcp" {
   tls_key_file  = "/run/secrets/host_privkey.pem"
   tls_disable   = false
 }
-
-
-############################# todo
-# plugin_directory
-# plugin_file_uid
-# plugin_file_permissions
-// telemetry {
-//   statsite_address = "127.0.0.1:8125"
-//   disable_hostname = true
-// }
-// seal "transit" { @see https://developer.hashicorp.com/vault/docs/configuration/seal/transit
-// }
