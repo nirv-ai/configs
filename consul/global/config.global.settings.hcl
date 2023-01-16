@@ -1,10 +1,12 @@
-alt_domain                           = "search" # @see https://developer.hashicorp.com/consul/docs/discovery/dns#alternative-domain
+alt_domain                           = "search"
 auto_reload_config                   = true
+bind_addr                            = "0.0.0.0"
+client_addr                          = "127.0.0.1"
 data_dir                             = "/opt/consul/data"
 datacenter                           = "us-east"
 default_query_time                   = "100s"
 disable_http_unprintable_char_filter = false
-disable_keyring_file                 = true # complete immutability
+disable_keyring_file                 = true
 disable_remote_exec                  = true
 disable_update_check                 = true
 discard_check_output                 = true
@@ -24,3 +26,7 @@ reconnect_timeout                    = "72h"
 session_ttl_min                      = "10s"
 skip_leave_on_interrupt              = true
 translate_wan_addrs                  = true
+
+addresses {
+  https = "0.0.0.0"
+}

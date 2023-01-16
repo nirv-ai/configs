@@ -1,6 +1,5 @@
 Kind = "proxy-defaults"
 Name = "global"
-Mode = "direct"
 
 Config {
   bind_address             = "0.0.0.0"

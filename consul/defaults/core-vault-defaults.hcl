@@ -1,7 +1,6 @@
 Kind     = "service-defaults"
 Name     = "core-vault"
 Protocol = "http"
-Mode     = "direct"
 
 UpstreamConfig {
   Defaults {
