@@ -16,11 +16,11 @@ storage "raft" {
   node_id = "node1"
 }
 
-api_addr     = "https://127.0.0.1:8300"
-cluster_addr = "https://127.0.0.1:8301"
+api_addr     = "https://127.0.0.1:8200"
+cluster_addr = "https://127.0.0.1:8201"
 
 listener "tcp" {
-  address       = "0.0.0.0:8300" # provides access to vault UI
+  address       = "0.0.0.0:8200" # provides access to vault UI
   tls_cert_file = "/run/secrets/host_fullchain.pem"
   tls_key_file  = "/run/secrets/host_privkey.pem"
   tls_disable   = false
