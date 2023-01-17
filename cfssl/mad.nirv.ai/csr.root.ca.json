@@ -1,0 +1,18 @@
+{
+  "CN": "mad.nirv.ai",
+  "hosts": ["127.0.0.1", "localhost", "mad.nirv.ai"],
+  "key": {
+    "algo": "ecdsa",
+    "size": 256
+  },
+  "names": [
+    {
+      "EM": "contact@nirvai.mozmail.com",
+      "OU": "platform",
+      "O": "nirv.ai",
+      "L": "internet",
+      "ST": "california",
+      "C": "us"
+    }
+  ]
+}
