@@ -26,7 +26,3 @@ reconnect_timeout                    = "72h"
 session_ttl_min                      = "10s"
 skip_leave_on_interrupt              = true
 translate_wan_addrs                  = true
-
-addresses {
-  https = "0.0.0.0"
-}
