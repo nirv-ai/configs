@@ -75,10 +75,10 @@ x-deploy: &service-deploy
   mode: global
   resources:
     reservations:
-      cpus: ".10"
+      cpus: ".1"
       memory: "1gb"
     limits:
-      cpus: ".25"
+      cpus: ".2"
       memory: "2gb"
 
 services:
@@ -90,18 +90,22 @@ services:
     env_file:
       - ./.env
       - ./apps/nirvai-core-consul/.env
+      - ./apps/nirvai-core-consul/.env.auto
+    extra_hosts:
+      - ${MESH_HOSTNAME}:127.0.0.1
+      - ${MESH_SERVER_HOSTNAME}:127.0.0.1
     networks:
       corenetwork:
-        aliases:
-          - ${MESH_HOSTNAME}
-          - ${MESH_SERVER_HOSTNAME}
-          - consul
+        # aliases:
+        #   - ${MESH_HOSTNAME}
+        #   - ${MESH_SERVER_HOSTNAME}
+        #   - consul
     ports:
       - "${CONSUL_PORT_CUNT}:${CONSUL_PORT_CUNT}"
-      - "${CONSUL_PORT_SERF_LAN}:${CONSUL_PORT_SERF_LAN}/tcp"
-      - "${CONSUL_PORT_SERF_WAN}:${CONSUL_PORT_SERF_WAN}/tcp"
-      - "${CONSUL_PORT_DNS}:${CONSUL_PORT_DNS}/tcp"
-      - "${CONSUL_PORT_DNS}:${CONSUL_PORT_DNS}/udp"
+      - "${CONSUL_PORT_SERF_LAN}/tcp"
+      - "${CONSUL_PORT_SERF_WAN}/tcp"
+      - "${CONSUL_PORT_DNS}/tcp"
+      - "${CONSUL_PORT_DNS}/udp"
     secrets:
       - *mesh-ca
       - *mesh-server
@@ -130,6 +134,7 @@ services:
     env_file:
       - ./.env
       - ./apps/nirvai-core-proxy/.env
+      - ./apps/nirvai-core-proxy/.env.auto
     extra_hosts:
       - ${PROJECT_HOSTNAME}:127.0.0.1
     networks:
@@ -146,8 +151,8 @@ services:
     volumes:
       - ./apps/nirvai-core-proxy/src/consul/config:/opt/consul/config:rw,z
       - ./apps/nirvai-core-proxy/src/consul/data:/opt/consul/data:rw,z
-      - ./apps/nirvai-core-proxy/src/consul/envoy:/opt/consul/envoy:ro,z
-      - ./apps/nirvai-core-proxy/src/haproxy:/usr/local/etc/haproxy:ro
+      - ./apps/nirvai-core-proxy/src/consul/envoy:/opt/consul/envoy:rw,z
+      - ./apps/nirvai-core-proxy/src/haproxy:/usr/local/etc/haproxy:rw
       - /var/run/docker.sock:/var/run/docker.sock:ro,z
     ### build ###
     image: ${REG_HOSTNAME}:${REG_PORT_HOST}/${COMPOSE_PROJECT_NAME}/core-proxy:${ENV:?environment is required}
@@ -168,6 +173,7 @@ services:
     env_file:
       - ./.env
       - ./apps/nirvai-core-vault/.env
+      - ./apps/nirvai-core-vault/.env.auto
     extra_hosts:
       - ${PROJECT_HOSTNAME}:127.0.0.1
     healthcheck:
@@ -176,7 +182,8 @@ services:
     networks:
       corenetwork:
     ports:
-      - "8202:${VAULT_PORT_CUNT}"
+      # - "8202:${VAULT_PORT_CUNT}" # prefer use of haproxy :8201
+      - "${VAULT_PORT_CUNT}"
     secrets:
       - *host-fullchain
       - *host-privkey
@@ -186,7 +193,7 @@ services:
     volumes:
       - ./apps/nirvai-core-vault/src/consul/config:/opt/consul/config:rw,z
       - ./apps/nirvai-core-vault/src/consul/data:/opt/consul/data:rw,z
-      - ./apps/nirvai-core-vault/src/consul/envoy:/opt/consul/envoy:ro,z
+      - ./apps/nirvai-core-vault/src/consul/envoy:/opt/consul/envoy:rw,z
       - ./apps/nirvai-core-vault/src/vault/config:/vault/config
       - ./apps/nirvai-core-vault/src/vault/data:/vault/data
     ### build ###
@@ -220,10 +227,10 @@ secrets:
   mesh_server_privkey:
     file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/server-0-key.pem"
   mesh_core_proxy:
-    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/server-1.pem"
+    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/client-0.pem"
   mesh_core_proxy_privkey:
-    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/server-1-key.pem"
+    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/client-0-key.pem"
   mesh_core_vault:
-    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/server-2.pem"
+    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/client-1.pem"
   mesh_core_vault_privkey:
-    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/server-2-key.pem"
+    file: "${CERTS_DIR_HOST}/${MESH_HOSTNAME}/client-1-key.pem"

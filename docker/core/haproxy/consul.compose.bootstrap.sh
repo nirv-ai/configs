@@ -1,11 +1,13 @@
 #!/bin/sh
 
+# uncomment to prevent unhealthy checks and allow you to ssh in and debug
+# sleep 3650d
+
 if test -z $CONSUL_HTTP_TOKEN; then
-  echo "CONSUL_HTTP_TOKEN not set; ignoring consul init request"
+  echo 'EXITING: CONSUL_HTTP_TOKEN not set'
   return 1
 fi
 
-# TODO: need to create token specifically for connect else default is required for envoy
 cat <<-EOF >/opt/consul/config/env.token.hcl
   acl {
     tokens {
@@ -16,16 +18,33 @@ cat <<-EOF >/opt/consul/config/env.token.hcl
 EOF
 
 chown -R consul:consul /opt/consul
+export CONNECT_SIDECAR_FOR=$CONSUL_NODE_PREFIX-$(hostname)
 
-echo "starting envoy service"
-# agent: Check socket connection failed: check=service:core-proxy-1-sidecar-proxy:1 error="dial tcp 127.0.0.1:21000: connect: connection refused"
-# su -g consul - consul sh -c "consul connect envoy -sidecar-for core-proxy-1" &
-su -g consul - consul sh -c "cd /opt/consul/envoy && envoy -c envoy.yaml" &
-echo "envoy success?: $?"
-echo $! >/opt/consul/pid.envoy
-echo "envoy pid saved: $(cat /opt/consul/pid.envoy)"
+start_envoy() {
+  su -g consul - consul sh -c \
+    "cd /opt/consul/envoy && envoy -c envoy.yaml"
+}
 
-echo "starting consul agent"
-su -g consul - consul sh -c "consul agent -node=core-proxy -config-dir=/opt/consul/config" &
-echo "consul success?: $?"
-echo "consul pid saved: : $(cat /opt/consul/pid.consul)"
+echo "starting envoy service: $CONNECT_SIDECAR_FOR"
+start_envoy &
+
+if test -n "$!"; then
+  echo $! >/opt/consul/pid.envoy
+  echo "envoy started: pid $!"
+else
+  echo 'error starting envoy'
+fi
+
+start_consul() {
+  su -g consul - consul sh -c \
+    "consul agent -node=${CONNECT_SIDECAR_FOR} -config-dir=/opt/consul/config -data-dir=/opt/consul/data"
+}
+
+echo "starting consul agent: $CONNECT_SIDECAR_FOR"
+start_consul &
+
+if test -f "/opt/consul/pid.consul"; then
+  echo "consul pid saved: : $(cat /opt/consul/pid.consul)"
+else
+  echo 'consul failed to create pidfile'
+fi
