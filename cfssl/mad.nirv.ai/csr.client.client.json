@@ -1,6 +1,6 @@
 {
-  "CN": "mesh.nirv.ai",
-  "hosts": ["127.0.0.1", "localhost"],
+  "CN": "mad.nirv.ai",
+  "hosts": ["127.0.0.1", "localhost", "mad.nirv.ai"],
   "key": {
     "algo": "ecdsa",
     "size": 256
