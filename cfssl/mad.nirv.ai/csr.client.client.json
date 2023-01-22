@@ -1,6 +1,6 @@
 {
   "CN": "mad.nirv.ai",
-  "hosts": ["127.0.0.1", "localhost", "mad.nirv.ai"],
+  "hosts": ["127.0.0.1", "localhost", "mad.nirv.ai", "client.global.nomad"],
   "key": {
     "algo": "ecdsa",
     "size": 256

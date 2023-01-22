@@ -8,5 +8,5 @@ tls {
   verify_server_hostname = true
   # requires http api clients to present a cert signed by the same CA as nomads cert
   # enabling prevents consul https health checks for agents
-  verify_https_client = false
+  verify_https_client = true
 }
