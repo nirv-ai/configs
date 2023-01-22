@@ -1,7 +1,5 @@
-data_dir   = "/tmp/server1"
 datacenter = "us_east"
 log_level  = "WARN"
-name       = "development_nirvai_web_server"
 region     = "global"
 
 server {
