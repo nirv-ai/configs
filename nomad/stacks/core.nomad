@@ -182,7 +182,7 @@ job "core" {
         }
         auth_soft_fail     = true # dont fail on auth errors
         force_pull         = true
-        image              = "${local.consulenv.PROJECT_HOSTNAME}:${var.REG_HOST_PORT}/${local.consul.image}"
+        image              = "${local.consul.image}"
         image_pull_timeout = "10m"
         ports              = ["consul_ui"]
 
