@@ -4,7 +4,6 @@ region     = "global"
 
 server {
   enabled                 = true
-  bootstrap_expect        = 1
   node_gc_threshold       = "10m"
   job_gc_interval         = "10m"
   eval_gc_threshold       = "10m"
