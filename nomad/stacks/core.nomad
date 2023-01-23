@@ -169,19 +169,10 @@ job "core" {
 
     network {
       mode     = "bridge"
-      port "postgres" {
-        # host port set as: NOMAD_HOST_PORT_postgres
+      port "consul_ui" {
         to = "${local.consul.ports[0].target}"
       }
     }
-
-    # TODO: still receiving permission errors
-    // volume "dev_core-postgres" {
-    //   type      = "host"
-    //   source    = "dev_core-postgres"
-    //   read_only = false
-    // }
-
     task "consul_task" {
       driver = "docker"
 
@@ -193,20 +184,14 @@ job "core" {
         force_pull         = true
         image              = "${local.consulenv.PROJECT_HOSTNAME}:${var.REG_HOST_PORT}/${local.consul.image}"
         image_pull_timeout = "10m"
-        ports              = ["postgres"]
+        ports              = ["consul_ui"]
 
         volumes = [
-          "${local.consul.volumes[0].source}:${local.consul.volumes[0].target}"
-          "${local.consul.volumes[1].source}:${local.consul.volumes[1].target}"
+          "${local.consul.volumes[0].source}:${local.consul.volumes[0].target}",
+          "${local.consul.volumes[1].source}:${local.consul.volumes[1].target}",
           "${local.consul.volumes[2].source}:${local.consul.volumes[2].target}"
         ]
       }
-
-      // volume_mount {
-      //   volume      = "dev_core-postgres"
-      //   destination = "${local.consul.volumes[0].target}/pgdata"
-      //   read_only   = false
-      // }
 
       env {
         CA_CERT = "${local.consulenv.CA_CERT}"
