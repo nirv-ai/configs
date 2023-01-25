@@ -151,27 +151,47 @@ job "core" {
   datacenters = ["${var.NOMAD_DC}"]
   region      = "${var.NOMAD_REGION}"
   type        = "service"
-
-  meta {
-    run_uuid = "${uuidv4()}" # turn off in prod
-  }
+  priority = 100
 
   constraint {
     attribute = "${attr.kernel.name}"
     value     = "linux"
   }
 
+  meta {
+    run_uuid = "${uuidv4()}" # turn off in prod
+    env = "validation" # maybe get this from ${env[NOMAD_ENV]} but needs to be setup
+  }
+
+  # temp disable until we get this shiz figured out
+  reschedule {
+    attempts = 0
+    unlimited = false
+  }
+
   group "consul" {
     count = 1
-    restart {
-      attempts = 1
-    }
 
     network {
       mode     = "bridge"
       port "consul_ui" {
         to = "${local.consul.ports[0].target}"
       }
+    }
+
+    restart {
+      attempts = 0
+      mode = "fail"
+    }
+
+    scaling {
+      enabled = true
+      min = 1
+      max = 1
+    }
+
+    service {
+      provider = "nomad"
     }
 
     task "core-consul" {
@@ -246,6 +266,11 @@ job "core" {
         MESH_HOSTNAME = "${local.consulenv.MESH_HOSTNAME}"
         MESH_SERVER_HOSTNAME = "${local.consulenv.MESH_SERVER_HOSTNAME}"
         PROJECT_HOSTNAME = "${local.consulenv.PROJECT_HOSTNAME}"
+      }
+
+      resources {
+        memory = 256 # MB
+        cpu = 500
       }
     }
   }
