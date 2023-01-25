@@ -7,7 +7,7 @@
 
 # let the server start without checking for tokens
 # as we may be bootstrapping a greenfield server
-cat <<-EOF >/opt/consul/config/env.token.hcl
+cat <<-EOF >/consul/config/env.token.hcl
     acl {
       tokens {
         agent  = "$CONSUL_HTTP_TOKEN"
@@ -16,12 +16,12 @@ cat <<-EOF >/opt/consul/config/env.token.hcl
     }
 EOF
 
-chown -R consul:consul /opt/consul
+chown -R consul:consul /consul
 
 start_consul() {
   consul agent \
-    -config-dir=/opt/consul/config \
-    -data-dir=/opt/consul/data \
+    -config-dir=/consul/config \
+    -data-dir=/consul/data \
     -domain=${MESH_HOSTNAME} \
     -node=$CONSUL_NODE_PREFIX-$(hostname)
 }

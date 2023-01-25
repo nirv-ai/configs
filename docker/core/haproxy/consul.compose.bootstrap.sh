@@ -8,7 +8,7 @@ if test -z $CONSUL_HTTP_TOKEN; then
   return 1
 fi
 
-cat <<-EOF >/opt/consul/config/env.token.hcl
+cat <<-EOF >/consul/config/env.token.hcl
   acl {
     tokens {
       agent  = "$CONSUL_HTTP_TOKEN"
@@ -17,19 +17,19 @@ cat <<-EOF >/opt/consul/config/env.token.hcl
   }
 EOF
 
-chown -R consul:consul /opt/consul
+chown -R consul:consul /consul
 export CONNECT_SIDECAR_FOR=$CONSUL_NODE_PREFIX-$(hostname)
 
 start_envoy() {
   su -g consul - consul sh -c \
-    "cd /opt/consul/envoy && envoy -c envoy.yaml"
+    "cd /consul/envoy && envoy -c envoy.yaml"
 }
 
 echo "starting envoy service: $CONNECT_SIDECAR_FOR"
 start_envoy &
 
 if test -n "$!"; then
-  echo $! >/opt/consul/pid.envoy
+  echo $! >/consul/pid.envoy
   echo "envoy started: pid $!"
 else
   echo 'error starting envoy'
@@ -37,14 +37,14 @@ fi
 
 start_consul() {
   su -g consul - consul sh -c \
-    "consul agent -node=${CONNECT_SIDECAR_FOR} -config-dir=/opt/consul/config -data-dir=/opt/consul/data"
+    "consul agent -node=${CONNECT_SIDECAR_FOR} -config-dir=/consul/config -data-dir=/consul/data"
 }
 
 echo "starting consul agent: $CONNECT_SIDECAR_FOR"
 start_consul &
 
-if test -f "/opt/consul/pid.consul"; then
-  echo "consul pid saved: : $(cat /opt/consul/pid.consul)"
+if test -f "/consul/pid.consul"; then
+  echo "consul pid saved: : $(cat /consul/pid.consul)"
 else
   echo 'consul failed to create pidfile'
 fi

@@ -161,7 +161,7 @@ job "core" {
     value     = "linux"
   }
 
-  group "consul_group" {
+  group "consul" {
     count = 1
     restart {
       attempts = 1
@@ -173,24 +173,52 @@ job "core" {
         to = "${local.consul.ports[0].target}"
       }
     }
-    task "consul_task" {
+
+    task "core-consul" {
       driver = "docker"
 
+      # @see https://developer.hashicorp.com/nomad/docs/drivers/docker
       config {
         healthchecks {
           disable = true
         }
+
         auth_soft_fail     = true # dont fail on auth errors
         force_pull         = true
         image              = "${local.consul.image}"
         image_pull_timeout = "10m"
         ports              = ["consul_ui"]
+        init = true
 
-        volumes = [
-          "${local.consul.volumes[0].source}:${local.consul.volumes[0].target}",
-          "${local.consul.volumes[1].source}:${local.consul.volumes[1].target}",
-          "${local.consul.volumes[2].source}:${local.consul.volumes[2].target}"
-        ]
+        // mount {
+        //   type = "bind"
+        //   target = "${local.consul.volumes[0].target}"
+        //   source = "${local.consul.volumes[0].source}"
+        //   readonly = false
+        //   bind_options {
+        //     propagation = "rshared"
+        //   }
+        // }
+        // mount {
+        //   type = "bind"
+        //   target = "${local.consul.volumes[1].target}"
+        //   source = "${local.consul.volumes[1].source}"
+        //   readonly = false
+        //   bind_options {
+        //     propagation = "rshared"
+        //   }
+        // }
+        // mount {
+        //   type = "bind"
+        //   target = "${local.consul.volumes[2].target}"
+        //   source = "${local.consul.volumes[2].source}"
+        //   readonly = true
+        // }
+        // volumes = [
+        //   "${local.consul.volumes[0].source}:${local.consul.volumes[0].target}",
+        //   "${local.consul.volumes[1].source}:${local.consul.volumes[1].target}",
+        //   "${local.consul.volumes[2].source}:${local.consul.volumes[2].target}"
+        // ]
       }
 
       env {
