@@ -196,6 +196,9 @@ job "core" {
 
     task "core-consul" {
       driver = "docker"
+      leader = true
+      # fkn su-exec: operation not permitted
+      user = "root"
 
       # @see https://developer.hashicorp.com/nomad/docs/drivers/docker
       config {
@@ -234,11 +237,11 @@ job "core" {
         //   source = "${local.consul.volumes[2].source}"
         //   readonly = true
         // }
-        // volumes = [
-        //   "${local.consul.volumes[0].source}:${local.consul.volumes[0].target}",
-        //   "${local.consul.volumes[1].source}:${local.consul.volumes[1].target}",
-        //   "${local.consul.volumes[2].source}:${local.consul.volumes[2].target}"
-        // ]
+        volumes = [
+          "${local.consul.volumes[0].source}:${local.consul.volumes[0].target}",
+          "${local.consul.volumes[1].source}:${local.consul.volumes[1].target}",
+          "${local.consul.volumes[2].source}:${local.consul.volumes[2].target}"
+        ]
       }
 
       env {
@@ -266,6 +269,12 @@ job "core" {
         MESH_HOSTNAME = "${local.consulenv.MESH_HOSTNAME}"
         MESH_SERVER_HOSTNAME = "${local.consulenv.MESH_SERVER_HOSTNAME}"
         PROJECT_HOSTNAME = "${local.consulenv.PROJECT_HOSTNAME}"
+      }
+
+      # max 30mb (3 + 3 * 5mb)
+      logs {
+        max_files     = 3
+        max_file_size = 5
       }
 
       resources {
