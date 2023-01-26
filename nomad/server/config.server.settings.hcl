@@ -6,7 +6,7 @@ server {
   heartbeat_grace         = "30m" # increase to 1hr if changing TLS related stuff on clients
   job_gc_interval         = "10m"
   node_gc_threshold       = "10m"
-  raft_protocol = 3 # 3> required for autopilot
+  raft_protocol           = 3 # 3> required for autopilot
 
   plan_rejection_tracker {
     enabled        = true
