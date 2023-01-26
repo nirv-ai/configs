@@ -241,6 +241,7 @@ job "core" {
     network {
       mode     = "bridge"
       port "consul_ui" {
+        static = 8501
         to = "${local.consul.ports[0].target}"
       }
     }
