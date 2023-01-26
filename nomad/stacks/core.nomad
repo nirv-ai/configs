@@ -111,30 +111,88 @@ variable "networks" {
   type = map(map(string))
 }
 variable "secrets" {
-  type = map(object({
+  type = object({
+    mesh_ca = object({
       name = string
       file = string
     })
-  )
+    mesh_core_proxy = object({
+      name = string
+      file = string
+    })
+    mesh_core_proxy_privkey = object({
+      name = string
+      file = string
+    })
+  })
+}
+variable "x-mesh-ca" {
+  type = object({
+    target = string
+  })
+}
+variable "x-mesh-core-proxy" {
+  type = object({
+    target = string
+  })
+}
+variable "x-mesh-core-proxy-privkey" {
+  type = object({
+    target = string
+  })
+}
+variable "x-mesh-core-vault" {
+  type = object({
+    target = string
+  })
+}
+variable "x-mesh-core-vault-privkey" {
+  type = object({
+    target = string
+  })
+}
+variable "x-mesh-server" {
+  type = object({
+    target = string
+  })
+}
+variable "x-mesh-server-privkey" {
+  type = object({
+    target = string
+  })
+}
+variable "x-nirvai-cert" {
+  type = object({
+    target = string
+  })
+}
+variable "x-nirvai-chain" {
+  type = object({
+    target = string
+  })
+}
+variable "x-nirvai-combined" {
+  type = object({
+    target = string
+  })
+}
+variable "x-nirvai-fullchain" {
+  type = object({
+    target = string
+  })
+}
+variable "x-nirvai-privkey" {
+  type = object({
+    target = string
+  })
 }
 # ignored variables
 variable "x-deploy" {}
-variable "x-mesh-ca" {}
-variable "x-mesh-core-proxy" {}
-variable "x-mesh-core-proxy-privkey" {}
-variable "x-mesh-core-vault" {}
-variable "x-mesh-core-vault-privkey" {}
-variable "x-mesh-server" {}
-variable "x-mesh-server-privkey" {}
-variable "x-nirvai-cert" {}
-variable "x-nirvai-chain" {}
-variable "x-nirvai-combined" {}
-variable "x-nirvai-fullchain" {}
-variable "x-nirvai-privkey" {}
 variable "x-service-defaults" {}
 variable "x-service-healthcheck" {}
+
 locals {
-   # consul_group
+  # consul_group
   consul    = var.services.core-consul
   consulenv = var.services.core-consul.environment
 
@@ -197,8 +255,7 @@ job "core" {
     task "core-consul" {
       driver = "docker"
       leader = true
-      # fkn su-exec: operation not permitted
-      user = "root"
+      user = "root" # su-exec: must be run as root, drops privs to docker USER
 
       # @see https://developer.hashicorp.com/nomad/docs/drivers/docker
       config {
@@ -213,35 +270,51 @@ job "core" {
         ports              = ["consul_ui"]
         init = true
 
-        // mount {
-        //   type = "bind"
-        //   target = "${local.consul.volumes[0].target}"
-        //   source = "${local.consul.volumes[0].source}"
-        //   readonly = false
-        //   bind_options {
-        //     propagation = "rshared"
-        //   }
-        // }
-        // mount {
-        //   type = "bind"
-        //   target = "${local.consul.volumes[1].target}"
-        //   source = "${local.consul.volumes[1].source}"
-        //   readonly = false
-        //   bind_options {
-        //     propagation = "rshared"
-        //   }
-        // }
-        // mount {
-        //   type = "bind"
-        //   target = "${local.consul.volumes[2].target}"
-        //   source = "${local.consul.volumes[2].source}"
-        //   readonly = true
-        // }
-        volumes = [
-          "${local.consul.volumes[0].source}:${local.consul.volumes[0].target}",
-          "${local.consul.volumes[1].source}:${local.consul.volumes[1].target}",
-          "${local.consul.volumes[2].source}:${local.consul.volumes[2].target}"
-        ]
+        mount {
+          type = "bind"
+          target = "${local.consul.volumes[0].target}"
+          source = "${local.consul.volumes[0].source}"
+          readonly = false
+          bind_options {
+            propagation = "rshared"
+          }
+        }
+        mount {
+          type = "bind"
+          target = "${local.consul.volumes[1].target}"
+          source = "${local.consul.volumes[1].source}"
+          readonly = false
+          bind_options {
+            propagation = "rshared"
+          }
+        }
+        mount {
+          type = "bind"
+          target = "${local.consul.volumes[2].target}"
+          source = "${local.consul.volumes[2].source}"
+          readonly = true
+        }
+        mount {
+          type = "bind"
+          target = "/run/secrets/${var.x-mesh-ca.target}"
+          source = "${var.secrets.mesh_ca.file}"
+        }
+        mount {
+          type = "bind"
+          target = "/run/secrets/${var.x-mesh-core-proxy.target}"
+          source = "${var.secrets.mesh_core_proxy.file}"
+        }
+        mount {
+          type = "bind"
+          target = "/run/secrets/${var.x-mesh-core-proxy-privkey.target}"
+          source = "${var.secrets.mesh_core_proxy_privkey.file}"
+        }
+
+        // volumes = [
+        //   "${local.consul.volumes[0].source}:${local.consul.volumes[0].target}",
+        //   "${local.consul.volumes[1].source}:${local.consul.volumes[1].target}",
+        //   "${local.consul.volumes[2].source}:${local.consul.volumes[2].target}"
+        // ]
       }
 
       env {
