@@ -11,11 +11,11 @@ RUN \
   sed -i "s/^consul:.*:[0-9]\{1,\}:/consul:x:$CONSUL_GID:/i" /etc/group
 
 RUN \
-  mkdir -p /opt/consul/data && \
-  mkdir -p /opt/consul/config && \
-  chown -R $CONSUL_UID:$CONSUL_GID /opt/consul
+  mkdir -p /consul/data && \
+  mkdir -p /consul/config && \
+  chown -R $CONSUL_UID:$CONSUL_GID /consul
 
-WORKDIR /opt/consul
+WORKDIR /consul
 
 COPY --chown=$CONSUL_UID:$CONSUL_GID ./consul.compose.bootstrap.sh .
 

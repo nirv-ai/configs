@@ -111,30 +111,88 @@ variable "networks" {
   type = map(map(string))
 }
 variable "secrets" {
-  type = map(object({
+  type = object({
+    mesh_ca = object({
       name = string
       file = string
     })
-  )
+    mesh_core_proxy = object({
+      name = string
+      file = string
+    })
+    mesh_core_proxy_privkey = object({
+      name = string
+      file = string
+    })
+  })
+}
+variable "x-mesh-ca" {
+  type = object({
+    target = string
+  })
+}
+variable "x-mesh-core-proxy" {
+  type = object({
+    target = string
+  })
+}
+variable "x-mesh-core-proxy-privkey" {
+  type = object({
+    target = string
+  })
+}
+variable "x-mesh-core-vault" {
+  type = object({
+    target = string
+  })
+}
+variable "x-mesh-core-vault-privkey" {
+  type = object({
+    target = string
+  })
+}
+variable "x-mesh-server" {
+  type = object({
+    target = string
+  })
+}
+variable "x-mesh-server-privkey" {
+  type = object({
+    target = string
+  })
+}
+variable "x-nirvai-cert" {
+  type = object({
+    target = string
+  })
+}
+variable "x-nirvai-chain" {
+  type = object({
+    target = string
+  })
+}
+variable "x-nirvai-combined" {
+  type = object({
+    target = string
+  })
+}
+variable "x-nirvai-fullchain" {
+  type = object({
+    target = string
+  })
+}
+variable "x-nirvai-privkey" {
+  type = object({
+    target = string
+  })
 }
 # ignored variables
 variable "x-deploy" {}
-variable "x-mesh-ca" {}
-variable "x-mesh-core-proxy" {}
-variable "x-mesh-core-proxy-privkey" {}
-variable "x-mesh-core-vault" {}
-variable "x-mesh-core-vault-privkey" {}
-variable "x-mesh-server" {}
-variable "x-mesh-server-privkey" {}
-variable "x-nirvai-cert" {}
-variable "x-nirvai-chain" {}
-variable "x-nirvai-combined" {}
-variable "x-nirvai-fullchain" {}
-variable "x-nirvai-privkey" {}
 variable "x-service-defaults" {}
 variable "x-service-healthcheck" {}
+
 locals {
-   # consul_group
+  # consul_group
   consul    = var.services.core-consul
   consulenv = var.services.core-consul.environment
 
@@ -151,21 +209,26 @@ job "core" {
   datacenters = ["${var.NOMAD_DC}"]
   region      = "${var.NOMAD_REGION}"
   type        = "service"
-
-  meta {
-    run_uuid = "${uuidv4()}" # turn off in prod
-  }
+  priority = 100
 
   constraint {
     attribute = "${attr.kernel.name}"
     value     = "linux"
   }
 
-  group "consul_group" {
+  meta {
+    run_uuid = "${uuidv4()}" # turn off in prod
+    env = "validation" # maybe get this from ${env[NOMAD_ENV]} but needs to be setup
+  }
+
+  # temp disable until we get this shiz figured out
+  reschedule {
+    attempts = 0
+    unlimited = false
+  }
+
+  group "consul" {
     count = 1
-    restart {
-      attempts = 1
-    }
 
     network {
       mode     = "bridge"
@@ -173,24 +236,85 @@ job "core" {
         to = "${local.consul.ports[0].target}"
       }
     }
-    task "consul_task" {
-      driver = "docker"
 
+    restart {
+      attempts = 0
+      mode = "fail"
+    }
+
+    scaling {
+      enabled = true
+      min = 1
+      max = 1
+    }
+
+    service {
+      provider = "nomad"
+    }
+
+    task "core-consul" {
+      driver = "docker"
+      leader = true
+      user = "root" # su-exec: must be run as root, drops privs to docker USER
+
+      # @see https://developer.hashicorp.com/nomad/docs/drivers/docker
       config {
         healthchecks {
           disable = true
         }
+
         auth_soft_fail     = true # dont fail on auth errors
         force_pull         = true
         image              = "${local.consul.image}"
         image_pull_timeout = "10m"
         ports              = ["consul_ui"]
+        init = true
 
-        volumes = [
-          "${local.consul.volumes[0].source}:${local.consul.volumes[0].target}",
-          "${local.consul.volumes[1].source}:${local.consul.volumes[1].target}",
-          "${local.consul.volumes[2].source}:${local.consul.volumes[2].target}"
-        ]
+        mount {
+          type = "bind"
+          target = "${local.consul.volumes[0].target}"
+          source = "${local.consul.volumes[0].source}"
+          readonly = false
+          bind_options {
+            propagation = "rshared"
+          }
+        }
+        mount {
+          type = "bind"
+          target = "${local.consul.volumes[1].target}"
+          source = "${local.consul.volumes[1].source}"
+          readonly = false
+          bind_options {
+            propagation = "rshared"
+          }
+        }
+        mount {
+          type = "bind"
+          target = "${local.consul.volumes[2].target}"
+          source = "${local.consul.volumes[2].source}"
+          readonly = true
+        }
+        mount {
+          type = "bind"
+          target = "/run/secrets/${var.x-mesh-ca.target}"
+          source = "${var.secrets.mesh_ca.file}"
+        }
+        mount {
+          type = "bind"
+          target = "/run/secrets/${var.x-mesh-core-proxy.target}"
+          source = "${var.secrets.mesh_core_proxy.file}"
+        }
+        mount {
+          type = "bind"
+          target = "/run/secrets/${var.x-mesh-core-proxy-privkey.target}"
+          source = "${var.secrets.mesh_core_proxy_privkey.file}"
+        }
+
+        // volumes = [
+        //   "${local.consul.volumes[0].source}:${local.consul.volumes[0].target}",
+        //   "${local.consul.volumes[1].source}:${local.consul.volumes[1].target}",
+        //   "${local.consul.volumes[2].source}:${local.consul.volumes[2].target}"
+        // ]
       }
 
       env {
@@ -218,6 +342,17 @@ job "core" {
         MESH_HOSTNAME = "${local.consulenv.MESH_HOSTNAME}"
         MESH_SERVER_HOSTNAME = "${local.consulenv.MESH_SERVER_HOSTNAME}"
         PROJECT_HOSTNAME = "${local.consulenv.PROJECT_HOSTNAME}"
+      }
+
+      # max 30mb (3 + 3 * 5mb)
+      logs {
+        max_files     = 3
+        max_file_size = 5
+      }
+
+      resources {
+        memory = 256 # MB
+        cpu = 500
       }
     }
   }

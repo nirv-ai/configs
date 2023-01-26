@@ -41,10 +41,10 @@ RUN set -eux && \
     gpgconf --kill all && \
     consul version
 RUN test -e /etc/nsswitch.conf || echo 'hosts: files dns' > /etc/nsswitch.conf
-RUN mkdir -p /opt/consul/data && \
-    mkdir -p /opt/consul/config && \
-    chown -R consul:consul /opt/consul
-COPY --chown=consul:consul ./consul/consul.compose.bootstrap.sh ./opt/consul
+RUN mkdir -p /consul/data && \
+    mkdir -p /consul/config && \
+    chown -R consul:consul /consul
+COPY --chown=consul:consul ./consul/consul.compose.bootstrap.sh ./consul
 
 ## consul template
 # @see https://releases.hashicorp.com/consul-template

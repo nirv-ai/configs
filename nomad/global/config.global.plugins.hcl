@@ -1,12 +1,11 @@
-plugin "qemu" {}
-plugin "java" {}
-plugin "exec" {}
-
 plugin "raw_exec" {
   config {
-    enabled = true
+    enabled = false
   }
 }
+
+plugin "exec" {}
+
 
 
 # @see somewhere on this page https://developer.hashicorp.com/nomad/docs/drivers/docker

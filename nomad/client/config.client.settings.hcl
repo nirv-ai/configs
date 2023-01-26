@@ -1,9 +1,6 @@
-datacenter = "us_east"
-log_level  = "WARN"
-region     = "global"
-
 client {
   cni_path            = "/opt/cni/bin"
+  cni_config_dir = "/opt/cni/config"
   enabled          = true
   gc_interval         = "1m"
   gc_max_allocs       = 50
