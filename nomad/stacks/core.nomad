@@ -268,7 +268,10 @@ job "core" {
         image              = "${local.consul.image}"
         image_pull_timeout = "10m"
         ports              = ["consul_ui"]
-        init = true
+        init = false
+        extra_hosts = "${local.consul.extra_hosts}"
+        interactive = false
+        entrypoint = "${local.consul.entrypoint}"
 
         mount {
           type = "bind"
