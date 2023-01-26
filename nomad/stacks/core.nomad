@@ -116,6 +116,14 @@ variable "secrets" {
       name = string
       file = string
     })
+    mesh_server = object({
+      name = string
+      file = string
+    })
+    mesh_server_privkey = object({
+      name = string
+      file = string
+    })
     mesh_core_proxy = object({
       name = string
       file = string
@@ -233,6 +241,7 @@ job "core" {
     network {
       mode     = "bridge"
       port "consul_ui" {
+        static = 8501
         to = "${local.consul.ports[0].target}"
       }
     }
@@ -266,9 +275,12 @@ job "core" {
         auth_soft_fail     = true # dont fail on auth errors
         force_pull         = true
         image              = "${local.consul.image}"
-        image_pull_timeout = "10m"
+        image_pull_timeout = "1m"
         ports              = ["consul_ui"]
-        init = true
+        init = false
+        extra_hosts = "${local.consul.extra_hosts}"
+        interactive = false
+        entrypoint = "${local.consul.entrypoint}"
 
         mount {
           type = "bind"
@@ -301,13 +313,13 @@ job "core" {
         }
         mount {
           type = "bind"
-          target = "/run/secrets/${var.x-mesh-core-proxy.target}"
-          source = "${var.secrets.mesh_core_proxy.file}"
+          target = "/run/secrets/${var.x-mesh-server.target}"
+          source = "${var.secrets.mesh_server.file}"
         }
         mount {
           type = "bind"
-          target = "/run/secrets/${var.x-mesh-core-proxy-privkey.target}"
-          source = "${var.secrets.mesh_core_proxy_privkey.file}"
+          target = "/run/secrets/${var.x-mesh-server-privkey.target}"
+          source = "${var.secrets.mesh_server_privkey.file}"
         }
 
         // volumes = [
