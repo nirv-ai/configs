@@ -12,9 +12,6 @@ variable "REG_HOST_PORT" {
   default = "5000"
 }
 # from env_file
-variable "name" {
-  type = string
-}
 variable "services" {
   type = object({
     core-consul = object({
@@ -107,9 +104,6 @@ variable "services" {
     // })
   })
 }
-variable "networks" {
-  type = map(map(string))
-}
 variable "secrets" {
   type = object({
     mesh_ca = object({
@@ -195,14 +189,33 @@ variable "x-nirvai-privkey" {
   })
 }
 # ignored variables
+variable "name" {}
+variable "networks" {}
 variable "x-deploy" {}
 variable "x-service-defaults" {}
 variable "x-service-healthcheck" {}
 
+# vars from env file should not be used directly
+# instead place them here and always use ${local.poop.boop.soup}
 locals {
   # consul_group
   consul    = var.services.core-consul
   consulenv = var.services.core-consul.environment
+  consulkeys = {
+    ca = {
+      target = "/run/secrets/${var.x-mesh-ca.target}"
+      source = "${var.secrets.mesh_ca.file}"
+    }
+    consul_pub = {
+      target = "/run/secrets/${var.x-mesh-server.target}"
+      source = "${var.secrets.mesh_server.file}"
+    }
+    consul_prv = {
+      target = "/run/secrets/${var.x-mesh-server-privkey.target}"
+      source = "${var.secrets.mesh_server_privkey.file}"
+    }
+  }
+
 
   # proxy_group
   // proxy    = var.services.core-proxy
@@ -308,18 +321,18 @@ job "core" {
         }
         mount {
           type = "bind"
-          target = "/run/secrets/${var.x-mesh-ca.target}"
-          source = "${var.secrets.mesh_ca.file}"
+          target = "${local.consulkeys.ca.target}"
+          source = "${local.consulkeys.ca.source}"
         }
         mount {
           type = "bind"
-          target = "/run/secrets/${var.x-mesh-server.target}"
-          source = "${var.secrets.mesh_server.file}"
+          target = "${local.consulkeys.consul_pub.target}"
+          source = "${local.consulkeys.consul_pub.source}"
         }
         mount {
           type = "bind"
-          target = "/run/secrets/${var.x-mesh-server-privkey.target}"
-          source = "${var.secrets.mesh_server_privkey.file}"
+          target = "${local.consulkeys.consul_prv.target}"
+          source = "${local.consulkeys.consul_prv.source}"
         }
 
         // volumes = [

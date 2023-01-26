@@ -14,7 +14,7 @@ client {
     retry_interval = "5s"
   }
 
-  meta {
-    owner = "core"
-  }
+  // meta {
+  //   owner = "core"
+  // }
 }
