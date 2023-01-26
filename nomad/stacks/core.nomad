@@ -26,22 +26,22 @@ variable "services" {
         CONSUL_CLIENT_CERT     = string
         CONSUL_CLIENT_KEY      = string
         CONSUL_CONFIG_DIR      = string
-        CONSUL_DNS_TOKEN       = string # TODO: dont reuse
+        CONSUL_DNS_TOKEN       = string
         CONSUL_ENVOY_PORT      = string
         CONSUL_FQDN_ADDR       = string
-        CONSUL_GID             = string # TODO: dont reuse
+        CONSUL_GID             = string
         CONSUL_HTTP_ADDR       = string
         CONSUL_HTTP_SSL        = string
-        CONSUL_HTTP_TOKEN      = string # TODO: dont reuse
+        CONSUL_HTTP_TOKEN      = string
         CONSUL_NODE_PREFIX     = string
         CONSUL_PORT_CUNT       = string
         CONSUL_PORT_DNS        = string
         CONSUL_PORT_SERF_LAN   = string
         CONSUL_PORT_SERF_WAN   = string
         CONSUL_TLS_SERVER_NAME = string
-        CONSUL_UID             = string # TODO dont reuse
-        ENVOY_GID              = string # TODO: dont reuse
-        ENVOY_UID              = string # TODO: dont reuse
+        CONSUL_UID             = string
+        ENVOY_GID              = string
+        ENVOY_UID              = string
         MESH_HOSTNAME          = string
         MESH_SERVER_HOSTNAME   = string
         PROJECT_HOSTNAME       = string
@@ -198,14 +198,20 @@ variable "x-service-healthcheck" {}
 # vars from env file should not be used directly
 # instead place them here and always use ${local.poop.boop.soup}
 locals {
-  # consul_group
-  consul    = var.services.core-consul
-  consulenv = var.services.core-consul.environment
-  consulkeys = {
+  # TODO: cert related files should be placed in nomad secrets
+  # and applications should retrieve the locations from envars
+  # ^ this should work even if set in confs, as envvars i believe override confs
+  # job
+  jobkeys = {
     ca = {
       target = "/run/secrets/${var.x-mesh-ca.target}"
       source = "${var.secrets.mesh_ca.file}"
     }
+  }
+  # consul_group
+  consul    = var.services.core-consul
+  consulenv = var.services.core-consul.environment
+  consulkeys = {
     consul_pub = {
       target = "/run/secrets/${var.x-mesh-server.target}"
       source = "${var.secrets.mesh_server.file}"
@@ -239,7 +245,6 @@ job "core" {
 
   meta {
     run_uuid = "${uuidv4()}" # turn off in prod
-    env      = "validation"  # maybe get this from ${env[NOMAD_ENV]} but needs to be setup
   }
 
   # temp disable until we get this shiz figured out
@@ -253,9 +258,19 @@ job "core" {
 
     network {
       mode = "bridge"
+
       port "consul_ui" {
-        static = 8501
-        to     = "${local.consul.ports[0].target}"
+        static = "${local.consulenv.CONSUL_PORT_CUNT}"
+        to     = "${local.consulenv.CONSUL_PORT_CUNT}"
+      }
+      port "consul_dns" {
+        to     = "${local.consulenv.CONSUL_PORT_DNS}"
+      }
+      port "consul_serf_lan" {
+        to     = "${local.consulenv.CONSUL_PORT_SERF_LAN}"
+      }
+      port "consul_serf_wan" {
+        to     = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
       }
     }
 
@@ -286,15 +301,17 @@ job "core" {
         }
 
         auth_soft_fail     = true # dont fail on auth errors
+        entrypoint         = "${local.consul.entrypoint}"
+        extra_hosts        = "${local.consul.extra_hosts}"
         force_pull         = true
         image              = "${local.consul.image}"
         image_pull_timeout = "1m"
-        ports              = ["consul_ui"]
         init               = false
-        extra_hosts        = "${local.consul.extra_hosts}"
         interactive        = false
-        entrypoint         = "${local.consul.entrypoint}"
+        ports              = ["consul_ui", "consul_dns", "consul_serf_lan", "consul_serf_wan"]
 
+        # TODO: these indexed mounts are going to fail
+        # ^ as soon as the order changes in compose file
         mount {
           type     = "bind"
           target   = "${local.consul.volumes[0].target}"
@@ -321,8 +338,8 @@ job "core" {
         }
         mount {
           type   = "bind"
-          target = "${local.consulkeys.ca.target}"
-          source = "${local.consulkeys.ca.source}"
+          target = "${local.jobkeys.ca.target}"
+          source = "${local.jobkeys.ca.source}"
         }
         mount {
           type   = "bind"
@@ -334,36 +351,33 @@ job "core" {
           target = "${local.consulkeys.consul_prv.target}"
           source = "${local.consulkeys.consul_prv.source}"
         }
-
-        // volumes = [
-        //   "${local.consul.volumes[0].source}:${local.consul.volumes[0].target}",
-        //   "${local.consul.volumes[1].source}:${local.consul.volumes[1].target}",
-        //   "${local.consul.volumes[2].source}:${local.consul.volumes[2].target}"
-        // ]
       }
 
+      # TODO: most of these arent needed for consul
+      # ^ they can now be shared with downstream services via nomad vars
+      # ^ and removed from consul task
       env {
         CA_CERT                = "${local.consulenv.CA_CERT}"
         CONSUL_ALT_DOMAIN      = "${local.consulenv.CONSUL_ALT_DOMAIN}"
         CONSUL_CLIENT_CERT     = "${local.consulenv.CONSUL_CLIENT_CERT}"
         CONSUL_CLIENT_KEY      = "${local.consulenv.CONSUL_CLIENT_KEY}"
         CONSUL_CONFIG_DIR      = "${local.consulenv.CONSUL_CONFIG_DIR}"
-        CONSUL_DNS_TOKEN       = "${local.consulenv.CONSUL_DNS_TOKEN}" # TODO: dont reuse
+        CONSUL_DNS_TOKEN       = "${local.consulenv.CONSUL_DNS_TOKEN}"
         CONSUL_ENVOY_PORT      = "${local.consulenv.CONSUL_ENVOY_PORT}"
         CONSUL_FQDN_ADDR       = "${local.consulenv.CONSUL_FQDN_ADDR}"
-        CONSUL_GID             = "${local.consulenv.CONSUL_GID}" # TODO: dont reuse
+        CONSUL_GID             = "${local.consulenv.CONSUL_GID}"
         CONSUL_HTTP_ADDR       = "${local.consulenv.CONSUL_HTTP_ADDR}"
         CONSUL_HTTP_SSL        = "${local.consulenv.CONSUL_HTTP_SSL}"
-        CONSUL_HTTP_TOKEN      = "${local.consulenv.CONSUL_HTTP_TOKEN}" # TODO: dont reuse
+        CONSUL_HTTP_TOKEN      = "${local.consulenv.CONSUL_HTTP_TOKEN}"
         CONSUL_NODE_PREFIX     = "${local.consulenv.CONSUL_NODE_PREFIX}"
         CONSUL_PORT_CUNT       = "${local.consulenv.CONSUL_PORT_CUNT}"
         CONSUL_PORT_DNS        = "${local.consulenv.CONSUL_PORT_DNS}"
         CONSUL_PORT_SERF_LAN   = "${local.consulenv.CONSUL_PORT_SERF_LAN}"
         CONSUL_PORT_SERF_WAN   = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
         CONSUL_TLS_SERVER_NAME = "${local.consulenv.CONSUL_TLS_SERVER_NAME}"
-        CONSUL_UID             = "${local.consulenv.CONSUL_UID}" # TODO dont reuse
-        ENVOY_GID              = "${local.consulenv.ENVOY_GID}"  # TODO: dont reuse
-        ENVOY_UID              = "${local.consulenv.ENVOY_UID}"  # TODO: dont reuse
+        CONSUL_UID             = "${local.consulenv.CONSUL_UID}"
+        ENVOY_GID              = "${local.consulenv.ENVOY_GID}"
+        ENVOY_UID              = "${local.consulenv.ENVOY_UID}"
         MESH_HOSTNAME          = "${local.consulenv.MESH_HOSTNAME}"
         MESH_SERVER_HOSTNAME   = "${local.consulenv.MESH_SERVER_HOSTNAME}"
         PROJECT_HOSTNAME       = "${local.consulenv.PROJECT_HOSTNAME}"
@@ -375,6 +389,7 @@ job "core" {
         max_file_size = 5
       }
 
+      # TODO: this shiz is wayyy off, check nomad ui and increase + surplus
       resources {
         memory = 256 # MB
         cpu    = 500
