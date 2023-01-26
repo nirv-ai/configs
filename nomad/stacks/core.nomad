@@ -292,7 +292,7 @@ job "core" {
     task "core-consul" {
       driver = "docker"
       leader = true
-      user   = "root" # su-exec: must be run as root, drops privs to docker USER
+      user   = "consul" # su-exec: must be run as root, drops privs to docker USER
 
       # @see https://developer.hashicorp.com/nomad/docs/drivers/docker
       config {
@@ -306,7 +306,7 @@ job "core" {
         force_pull         = true
         image              = "${local.consul.image}"
         image_pull_timeout = "1m"
-        init               = false
+        init               = true
         interactive        = false
         ports              = ["consul_ui", "consul_dns", "consul_serf_lan", "consul_serf_wan"]
 
@@ -334,7 +334,7 @@ job "core" {
           type     = "bind"
           target   = "${local.consul.volumes[2].target}"
           source   = "${local.consul.volumes[2].source}"
-          readonly = true
+          readonly = false
         }
         mount {
           type   = "bind"
