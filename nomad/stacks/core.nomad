@@ -496,14 +496,14 @@ job "core" {
       max     = 1
     }
 
-    // service {
-    //   provider = "nomad"
-    // }
+    service {
+      provider = "nomad"
+    }
 
     task "core-proxy" {
       driver = "docker"
       leader = true
-      user   = "haproxy"
+      user   = "root"
 
       config {
         # TODO: haproxy has working docker healthchecks
