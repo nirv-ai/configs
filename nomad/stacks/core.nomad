@@ -70,6 +70,7 @@ variable "services" {
         CERTS_DIR_CUNT         = string
         CERTS_DIR_HOST         = string
         CONSUL_ALT_DOMAIN      = string
+        CONSUL_CACERT          = string
         CONSUL_CLIENT_CERT     = string
         CONSUL_CLIENT_KEY      = string
         CONSUL_CONFIG_DIR      = string
@@ -143,6 +144,22 @@ variable "secrets" {
       name = string
       file = string
     })
+    mesh_core_proxy = object({
+      name = string
+      file = string
+    })
+    mesh_core_proxy_privkey = object({
+      name = string
+      file = string
+    })
+    mesh_core_vault = object({
+      name = string
+      file = string
+    })
+    mesh_core_vault_privkey = object({
+      name = string
+      file = string
+    })
     mesh_server = object({
       name = string
       file = string
@@ -151,11 +168,15 @@ variable "secrets" {
       name = string
       file = string
     })
-    mesh_core_proxy = object({
+    nirvai_combined = object({
       name = string
       file = string
     })
-    mesh_core_proxy_privkey = object({
+    nirvai_fullchain = object({
+      name = string
+      file = string
+    })
+    nirvai_privkey = object({
       name = string
       file = string
     })
@@ -267,6 +288,10 @@ locals {
     proxy_prv = {
       target = "/run/secrets/${var.x-mesh-core-proxy-privkey.target}"
       source = "${var.secrets.mesh_core_proxy_privkey.file}"
+    }
+    host_combined = {
+      target = "/run/secrets/${var.x-nirvai-combined.target}"
+      source = "${var.secrets.nirvai_combined.file}"
     }
   }
 
@@ -495,6 +520,7 @@ job "core" {
         interactive        = false
         ports              = ["proxy_edge", "proxy_stats", "proxy_vault"]
 
+        # TODO: these index mount points have the same issue as consuls
         mount { # consul/config
           type     = "bind"
           target   = "${local.proxy.volumes[0].target}"
@@ -551,6 +577,11 @@ job "core" {
           type   = "bind"
           target = "${local.proxykeys.proxy_prv.target}"
           source = "${local.proxykeys.proxy_prv.source}"
+        }
+        mount {
+          type   = "bind"
+          target = "${local.proxykeys.host_combined.target}"
+          source = "${local.proxykeys.host_combined.source}"
         }
       }
 
