@@ -506,6 +506,7 @@ job "core" {
       user   = "haproxy"
 
       config {
+        # TODO: haproxy has working docker healthchecks
         healthchecks {
           disable = true
         }
@@ -578,6 +579,8 @@ job "core" {
           target = "${local.proxykeys.proxy_prv.target}"
           source = "${local.proxykeys.proxy_prv.source}"
         }
+        # e.g. dev.nirv.ai,
+        # TODO: change from host_combined to something like ingress_combined
         mount {
           type   = "bind"
           target = "${local.proxykeys.host_combined.target}"
@@ -586,7 +589,39 @@ job "core" {
       }
 
       env {
-        PROJECT_HOSTNAME = "${local.proxyenv.PROJECT_HOSTNAME}"
+        CA_CERT                = "${local.proxyenv.CA_CERT}"
+        CERTS_DIR_CUNT         = "${local.proxyenv.CERTS_DIR_CUNT}"
+        CERTS_DIR_HOST         = "${local.proxyenv.CERTS_DIR_HOST}"
+        CONSUL_ALT_DOMAIN      = "${local.proxyenv.CONSUL_ALT_DOMAIN}"
+        CONSUL_CACERT          = "${local.proxyenv.CONSUL_CACERT}"
+        CONSUL_CLIENT_CERT     = "${local.proxyenv.CONSUL_CLIENT_CERT}"
+        CONSUL_CLIENT_KEY      = "${local.proxyenv.CONSUL_CLIENT_KEY}"
+        CONSUL_CONFIG_DIR      = "${local.proxyenv.CONSUL_CONFIG_DIR}"
+        CONSUL_ENVOY_PORT      = "${local.proxyenv.CONSUL_ENVOY_PORT}"
+        CONSUL_FQDN_ADDR       = "${local.proxyenv.CONSUL_FQDN_ADDR}"
+        CONSUL_GID             = "${local.proxyenv.CONSUL_GID}"
+        CONSUL_HTTP_ADDR       = "${local.proxyenv.CONSUL_HTTP_ADDR}"
+        CONSUL_HTTP_SSL        = "${local.proxyenv.CONSUL_HTTP_SSL}"
+        CONSUL_HTTP_TOKEN      = "${local.proxyenv.CONSUL_HTTP_TOKEN}"
+        CONSUL_NODE_PREFIX     = "${local.proxyenv.CONSUL_NODE_PREFIX}"
+        CONSUL_PORT_CUNT       = "${local.proxyenv.CONSUL_PORT_CUNT}"
+        CONSUL_PORT_DNS        = "${local.proxyenv.CONSUL_PORT_DNS}"
+        CONSUL_PORT_SERF_LAN   = "${local.proxyenv.CONSUL_PORT_SERF_LAN}"
+        CONSUL_PORT_SERF_WAN   = "${local.proxyenv.CONSUL_PORT_SERF_WAN}"
+        CONSUL_TLS_SERVER_NAME = "${local.proxyenv.CONSUL_TLS_SERVER_NAME}"
+        CONSUL_UID             = "${local.proxyenv.CONSUL_UID}"
+        ENVOY_GID              = "${local.proxyenv.ENVOY_GID}"
+        ENVOY_UID              = "${local.proxyenv.ENVOY_UID}"
+        MESH_HOSTNAME          = "${local.proxyenv.MESH_HOSTNAME}"
+        MESH_SERVER_HOSTNAME   = "${local.proxyenv.MESH_SERVER_HOSTNAME}"
+        PROJECT_CERTS          = "${local.proxyenv.PROJECT_CERTS}"
+        PROJECT_DOMAIN_NAME    = "${local.proxyenv.PROJECT_DOMAIN_NAME}"
+        PROJECT_HOSTNAME       = "${local.proxyenv.PROJECT_HOSTNAME}"
+        PROXY_AUTH_PASS        = "${local.proxyenv.PROXY_AUTH_PASS}"
+        PROXY_PORT_EDGE        = "${local.proxyenv.PROXY_PORT_EDGE}"
+        PROXY_PORT_STATS       = "${local.proxyenv.PROXY_PORT_STATS}"
+        PROXY_PORT_VAULT       = "${local.proxyenv.PROXY_PORT_VAULT}"
+        VAULT_PORT_CUNT        = "${local.proxyenv.VAULT_PORT_CUNT}"
       }
     }
   }
