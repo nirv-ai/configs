@@ -617,11 +617,24 @@ job "core" {
         PROJECT_CERTS          = "${local.proxyenv.PROJECT_CERTS}"
         PROJECT_DOMAIN_NAME    = "${local.proxyenv.PROJECT_DOMAIN_NAME}"
         PROJECT_HOSTNAME       = "${local.proxyenv.PROJECT_HOSTNAME}"
+        PROXY_AUTH_NAME        = "${local.proxyenv.PROXY_AUTH_NAME}"
         PROXY_AUTH_PASS        = "${local.proxyenv.PROXY_AUTH_PASS}"
         PROXY_PORT_EDGE        = "${local.proxyenv.PROXY_PORT_EDGE}"
         PROXY_PORT_STATS       = "${local.proxyenv.PROXY_PORT_STATS}"
         PROXY_PORT_VAULT       = "${local.proxyenv.PROXY_PORT_VAULT}"
         VAULT_PORT_CUNT        = "${local.proxyenv.VAULT_PORT_CUNT}"
+      }
+
+      # max 30mb (3 + 3 * 5mb)
+      logs {
+        max_files     = 3
+        max_file_size = 5
+      }
+
+      # TODO: this shiz is wayyy off, check nomad ui and increase + surplus
+      resources {
+        memory = 256 # MB
+        cpu    = 500
       }
     }
   }
