@@ -332,13 +332,16 @@ job "core" {
         to     = "${local.consulenv.CONSUL_PORT_CUNT}"
       }
       port "consul_dns" {
-        to = "${local.consulenv.CONSUL_PORT_DNS}"
+        static = "${local.consulenv.CONSUL_PORT_DNS}"
+        to     = "${local.consulenv.CONSUL_PORT_DNS}"
       }
       port "consul_serf_lan" {
-        to = "${local.consulenv.CONSUL_PORT_SERF_LAN}"
+        static = "${local.consulenv.CONSUL_PORT_SERF_LAN}"
+        to     = "${local.consulenv.CONSUL_PORT_SERF_LAN}"
       }
       port "consul_serf_wan" {
-        to = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
+        static = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
+        to     = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
       }
     }
 
@@ -355,6 +358,7 @@ job "core" {
 
     service {
       provider = "nomad"
+      name     = "core-consul"
     }
 
     task "core-consul" {
@@ -498,6 +502,7 @@ job "core" {
 
     service {
       provider = "nomad"
+      name     = "core-proxy"
     }
 
     task "core-proxy" {
