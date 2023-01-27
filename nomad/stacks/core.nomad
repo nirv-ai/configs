@@ -59,6 +59,60 @@ variable "services" {
       }))
     })
 
+    core-proxy = object({
+      domainname  = string
+      entrypoint  = list(string)
+      image       = string
+      extra_hosts = list(string)
+
+      environment = object({
+        CA_CERT                = string
+        CERTS_DIR_CUNT         = string
+        CERTS_DIR_HOST         = string
+        CONSUL_ALT_DOMAIN      = string
+        CONSUL_CACERT          = string
+        CONSUL_CLIENT_CERT     = string
+        CONSUL_CLIENT_KEY      = string
+        CONSUL_CONFIG_DIR      = string
+        CONSUL_ENVOY_PORT      = string
+        CONSUL_FQDN_ADDR       = string
+        CONSUL_GID             = string
+        CONSUL_HTTP_ADDR       = string
+        CONSUL_HTTP_SSL        = string
+        CONSUL_HTTP_TOKEN      = string
+        CONSUL_NODE_PREFIX     = string
+        CONSUL_PORT_CUNT       = string
+        CONSUL_PORT_DNS        = string
+        CONSUL_PORT_SERF_LAN   = string
+        CONSUL_PORT_SERF_WAN   = string
+        CONSUL_TLS_SERVER_NAME = string
+        CONSUL_UID             = string
+        ENVOY_GID              = string
+        ENVOY_UID              = string
+        MESH_HOSTNAME          = string
+        MESH_SERVER_HOSTNAME   = string
+        PROJECT_CERTS          = string
+        PROJECT_DOMAIN_NAME    = string
+        PROJECT_HOSTNAME       = string
+        PROXY_AUTH_NAME        = string
+        PROXY_AUTH_PASS        = string
+        PROXY_PORT_EDGE        = string
+        PROXY_PORT_STATS       = string
+        PROXY_PORT_VAULT       = string
+        VAULT_PORT_CUNT        = string
+      })
+      ports = list(object({
+        mode      = string
+        protocol  = string
+        published = string
+        target    = string
+      }))
+      volumes = list(object({
+        type   = string
+        source = string
+        target = string
+      }))
+    })
     // core-vault = object({
     //   cap_add        = list(string)
     //   entrypoint     = list(string)
@@ -82,31 +136,27 @@ variable "services" {
     //     })
     //   }))
     // })
-
-    // core-proxy = object({
-    //   entrypoint     = list(string)
-    //   image          = string
-    //   environment = object({
-    //     PROJECT_HOSTNAME = string
-    //     PROJECT_NAME     = string
-    //   })
-    //   ports = list(object({
-    //     mode      = string
-    //     protocol  = string
-    //     published = string
-    //     target    = string
-    //   }))
-    //   volumes = list(object({
-    //     type   = string
-    //     source = string
-    //     target = string
-    //   }))
-    // })
   })
 }
 variable "secrets" {
   type = object({
     mesh_ca = object({
+      name = string
+      file = string
+    })
+    mesh_core_proxy = object({
+      name = string
+      file = string
+    })
+    mesh_core_proxy_privkey = object({
+      name = string
+      file = string
+    })
+    mesh_core_vault = object({
+      name = string
+      file = string
+    })
+    mesh_core_vault_privkey = object({
       name = string
       file = string
     })
@@ -118,11 +168,15 @@ variable "secrets" {
       name = string
       file = string
     })
-    mesh_core_proxy = object({
+    nirvai_combined = object({
       name = string
       file = string
     })
-    mesh_core_proxy_privkey = object({
+    nirvai_fullchain = object({
+      name = string
+      file = string
+    })
+    nirvai_privkey = object({
       name = string
       file = string
     })
@@ -224,8 +278,22 @@ locals {
 
 
   # proxy_group
-  // proxy    = var.services.core-proxy
-  // proxyenv = var.services.core-proxy.environment
+  proxy    = var.services.core-proxy
+  proxyenv = var.services.core-proxy.environment
+  proxykeys = {
+    proxy_pub = {
+      target = "/run/secrets/${var.x-mesh-core-proxy.target}"
+      source = "${var.secrets.mesh_core_proxy.file}"
+    }
+    proxy_prv = {
+      target = "/run/secrets/${var.x-mesh-core-proxy-privkey.target}"
+      source = "${var.secrets.mesh_core_proxy_privkey.file}"
+    }
+    host_combined = {
+      target = "/run/secrets/${var.x-nirvai-combined.target}"
+      source = "${var.secrets.nirvai_combined.file}"
+    }
+  }
 
   # vault_group
   // vault    = var.services.core-vault
@@ -264,13 +332,13 @@ job "core" {
         to     = "${local.consulenv.CONSUL_PORT_CUNT}"
       }
       port "consul_dns" {
-        to     = "${local.consulenv.CONSUL_PORT_DNS}"
+        to = "${local.consulenv.CONSUL_PORT_DNS}"
       }
       port "consul_serf_lan" {
-        to     = "${local.consulenv.CONSUL_PORT_SERF_LAN}"
+        to = "${local.consulenv.CONSUL_PORT_SERF_LAN}"
       }
       port "consul_serf_wan" {
-        to     = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
+        to = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
       }
     }
 
@@ -292,13 +360,13 @@ job "core" {
     task "core-consul" {
       driver = "docker"
       leader = true
-      user   = "consul" # su-exec: must be run as root, drops privs to docker USER
+      user   = "consul"
 
-      # @see https://developer.hashicorp.com/nomad/docs/drivers/docker
       config {
         healthchecks {
           disable = true
         }
+
 
         auth_soft_fail     = true # dont fail on auth errors
         entrypoint         = "${local.consul.entrypoint}"
@@ -312,7 +380,7 @@ job "core" {
 
         # TODO: these indexed mounts are going to fail
         # ^ as soon as the order changes in compose file
-        mount {
+        mount { # consul/config
           type     = "bind"
           target   = "${local.consul.volumes[0].target}"
           source   = "${local.consul.volumes[0].source}"
@@ -321,7 +389,7 @@ job "core" {
             propagation = "rshared"
           }
         }
-        mount {
+        mount { # consul/data
           type     = "bind"
           target   = "${local.consul.volumes[1].target}"
           source   = "${local.consul.volumes[1].source}"
@@ -330,11 +398,11 @@ job "core" {
             propagation = "rshared"
           }
         }
-        mount {
+        mount { #dockersock
           type     = "bind"
           target   = "${local.consul.volumes[2].target}"
           source   = "${local.consul.volumes[2].source}"
-          readonly = false
+          readonly = true
         }
         mount {
           type   = "bind"
@@ -397,57 +465,166 @@ job "core" {
     }
   }
 
-  // group "proxy_group" {
-  //   count = 1
-  //   restart {
-  //     attempts = 1
-  //   }
+  group "proxy" {
+    count = 1
 
-  //   network {
-  //     mode     = "overlay"
-  //     // hostname = "${local.proxy.hostname}"
+    network {
+      mode = "bridge"
 
-  //     port "edge" {
-  //       # host port set as: NOMAD_HOST_PORT_edge
-  //       to = "${local.proxy.ports[0].target}"
-  //     }
-  //     port "vault" {
-  //       # host port set as: NOMAD_HOST_PORT_vault
-  //       to = "${local.proxy.ports[1].target}"
-  //     }
-  //     port "stats" {
-  //       # host port set as: NOMAD_HOST_PORT_stats
-  //       to = "${local.proxy.ports[2].target}"
-  //     }
-  //   }
+      port "proxy_edge" {
+        static = "${local.proxyenv.PROXY_PORT_EDGE}"
+        to     = "${local.proxyenv.PROXY_PORT_EDGE}"
+      }
+      port "proxy_stats" {
+        static = "${local.proxyenv.PROXY_PORT_STATS}"
+        to     = "${local.proxyenv.PROXY_PORT_STATS}"
+      }
+      port "proxy_vault" {
+        static = "${local.proxyenv.PROXY_PORT_VAULT}"
+        to     = "${local.proxyenv.PROXY_PORT_VAULT}"
+      }
+    }
 
-  //   task "proxy_task" {
-  //     driver = "docker"
+    restart {
+      attempts = 0
+      mode     = "fail"
+    }
 
-  //     config {
-  //       healthchecks {
-  //         disable = true
-  //       }
-  //       auth_soft_fail     = true # dont fail on auth errors
-  //       entrypoint         = "${local.proxy.entrypoint}"
-  //       force_pull         = true
-  //       image              = "${local.proxyenv.PROJECT_HOSTNAME}:${var.REG_HOST_PORT}/${local.proxy.image}"
-  //       image_pull_timeout = "10m"
-  //       ports              = ["edge", "vault", "stats"]
+    scaling {
+      enabled = true
+      min     = 1
+      max     = 1
+    }
 
-  //       volumes = [
-  //         "${local.proxy.volumes[0].source}:${local.proxy.volumes[0].target}",
-  //         "${local.proxy.volumes[1].source}:${local.proxy.volumes[1].target}",
-  //         "${local.proxy.volumes[2].source}:${local.proxy.volumes[2].target}"
-  //       ]
-  //     }
+    service {
+      provider = "nomad"
+    }
 
-  //     env {
-  //       PROJECT_HOSTNAME = "${local.proxyenv.PROJECT_HOSTNAME}"
-  //       PROJECT_NAME     = "${local.proxyenv.PROJECT_NAME}"
-  //     }
-  //   }
-  // }
+    task "core-proxy" {
+      driver = "docker"
+      leader = true
+      user   = "root"
+
+      config {
+        # TODO: haproxy has working docker healthchecks
+        healthchecks {
+          disable = true
+        }
+
+        auth_soft_fail     = true # dont fail on auth errors
+        entrypoint         = "${local.proxy.entrypoint}"
+        extra_hosts        = "${local.proxy.extra_hosts}"
+        force_pull         = true
+        image              = "${local.proxy.image}"
+        image_pull_timeout = "1m"
+        init               = true
+        interactive        = false
+        ports              = ["proxy_edge", "proxy_stats", "proxy_vault"]
+
+        # TODO: these index mount points have the same issue as consuls
+        mount { # consul/config
+          type     = "bind"
+          target   = "${local.proxy.volumes[0].target}"
+          source   = "${local.proxy.volumes[0].source}"
+          readonly = false
+          bind_options {
+            propagation = "rshared"
+          }
+        }
+        mount { # consul/data
+          type     = "bind"
+          target   = "${local.proxy.volumes[1].target}"
+          source   = "${local.proxy.volumes[1].source}"
+          readonly = false
+          bind_options {
+            propagation = "rshared"
+          }
+        }
+        mount { # consul/envoy
+          type     = "bind"
+          target   = "${local.proxy.volumes[2].target}"
+          source   = "${local.proxy.volumes[2].source}"
+          readonly = false
+          bind_options {
+            propagation = "rshared"
+          }
+        }
+        mount { # haproxy
+          type     = "bind"
+          target   = "${local.proxy.volumes[3].target}"
+          source   = "${local.proxy.volumes[3].source}"
+          readonly = false
+          bind_options {
+            propagation = "rshared"
+          }
+        }
+        mount { #dockersock
+          type     = "bind"
+          target   = "${local.proxy.volumes[4].target}"
+          source   = "${local.proxy.volumes[4].source}"
+          readonly = true
+        }
+        mount {
+          type   = "bind"
+          target = "${local.jobkeys.ca.target}"
+          source = "${local.jobkeys.ca.source}"
+        }
+        mount {
+          type   = "bind"
+          target = "${local.proxykeys.proxy_pub.target}"
+          source = "${local.proxykeys.proxy_pub.source}"
+        }
+        mount {
+          type   = "bind"
+          target = "${local.proxykeys.proxy_prv.target}"
+          source = "${local.proxykeys.proxy_prv.source}"
+        }
+        # e.g. dev.nirv.ai,
+        # TODO: change from host_combined to something like ingress_combined
+        mount {
+          type   = "bind"
+          target = "${local.proxykeys.host_combined.target}"
+          source = "${local.proxykeys.host_combined.source}"
+        }
+      }
+
+      env {
+        CA_CERT                = "${local.proxyenv.CA_CERT}"
+        CERTS_DIR_CUNT         = "${local.proxyenv.CERTS_DIR_CUNT}"
+        CERTS_DIR_HOST         = "${local.proxyenv.CERTS_DIR_HOST}"
+        CONSUL_ALT_DOMAIN      = "${local.proxyenv.CONSUL_ALT_DOMAIN}"
+        CONSUL_CACERT          = "${local.proxyenv.CONSUL_CACERT}"
+        CONSUL_CLIENT_CERT     = "${local.proxyenv.CONSUL_CLIENT_CERT}"
+        CONSUL_CLIENT_KEY      = "${local.proxyenv.CONSUL_CLIENT_KEY}"
+        CONSUL_CONFIG_DIR      = "${local.proxyenv.CONSUL_CONFIG_DIR}"
+        CONSUL_ENVOY_PORT      = "${local.proxyenv.CONSUL_ENVOY_PORT}"
+        CONSUL_FQDN_ADDR       = "${local.proxyenv.CONSUL_FQDN_ADDR}"
+        CONSUL_GID             = "${local.proxyenv.CONSUL_GID}"
+        CONSUL_HTTP_ADDR       = "${local.proxyenv.CONSUL_HTTP_ADDR}"
+        CONSUL_HTTP_SSL        = "${local.proxyenv.CONSUL_HTTP_SSL}"
+        CONSUL_HTTP_TOKEN      = "${local.proxyenv.CONSUL_HTTP_TOKEN}"
+        CONSUL_NODE_PREFIX     = "${local.proxyenv.CONSUL_NODE_PREFIX}"
+        CONSUL_PORT_CUNT       = "${local.proxyenv.CONSUL_PORT_CUNT}"
+        CONSUL_PORT_DNS        = "${local.proxyenv.CONSUL_PORT_DNS}"
+        CONSUL_PORT_SERF_LAN   = "${local.proxyenv.CONSUL_PORT_SERF_LAN}"
+        CONSUL_PORT_SERF_WAN   = "${local.proxyenv.CONSUL_PORT_SERF_WAN}"
+        CONSUL_TLS_SERVER_NAME = "${local.proxyenv.CONSUL_TLS_SERVER_NAME}"
+        CONSUL_UID             = "${local.proxyenv.CONSUL_UID}"
+        ENVOY_GID              = "${local.proxyenv.ENVOY_GID}"
+        ENVOY_UID              = "${local.proxyenv.ENVOY_UID}"
+        MESH_HOSTNAME          = "${local.proxyenv.MESH_HOSTNAME}"
+        MESH_SERVER_HOSTNAME   = "${local.proxyenv.MESH_SERVER_HOSTNAME}"
+        PROJECT_CERTS          = "${local.proxyenv.PROJECT_CERTS}"
+        PROJECT_DOMAIN_NAME    = "${local.proxyenv.PROJECT_DOMAIN_NAME}"
+        PROJECT_HOSTNAME       = "${local.proxyenv.PROJECT_HOSTNAME}"
+        PROXY_AUTH_PASS        = "${local.proxyenv.PROXY_AUTH_PASS}"
+        PROXY_PORT_EDGE        = "${local.proxyenv.PROXY_PORT_EDGE}"
+        PROXY_PORT_STATS       = "${local.proxyenv.PROXY_PORT_STATS}"
+        PROXY_PORT_VAULT       = "${local.proxyenv.PROXY_PORT_VAULT}"
+        VAULT_PORT_CUNT        = "${local.proxyenv.VAULT_PORT_CUNT}"
+      }
+    }
+  }
 
   // group "vault_group" {
   //   count = 1
