@@ -358,7 +358,7 @@ job "core" {
 
     service {
       provider = "nomad"
-      name     = "core-consul"
+      tags     = ["consul"]
     }
 
     task "core-consul" {
@@ -367,11 +367,6 @@ job "core" {
       user   = "consul"
 
       config {
-        healthchecks {
-          disable = true
-        }
-
-
         auth_soft_fail     = true # dont fail on auth errors
         entrypoint         = "${local.consul.entrypoint}"
         extra_hosts        = "${local.consul.extra_hosts}"
@@ -380,7 +375,12 @@ job "core" {
         image_pull_timeout = "1m"
         init               = true
         interactive        = false
-        ports              = ["consul_ui", "consul_dns", "consul_serf_lan", "consul_serf_wan"]
+
+        ports = ["consul_ui", "consul_dns", "consul_serf_lan", "consul_serf_wan"]
+
+        healthchecks {
+          disable = true
+        }
 
         # TODO: these indexed mounts are going to fail
         # ^ as soon as the order changes in compose file
@@ -423,7 +423,7 @@ job "core" {
           target = "${local.consulkeys.consul_prv.target}"
           source = "${local.consulkeys.consul_prv.source}"
         }
-      }
+      } # end config
 
       # TODO: most of these arent needed for consul
       # ^ they can now be shared with downstream services via nomad vars
@@ -453,7 +453,7 @@ job "core" {
         MESH_HOSTNAME          = "${local.consulenv.MESH_HOSTNAME}"
         MESH_SERVER_HOSTNAME   = "${local.consulenv.MESH_SERVER_HOSTNAME}"
         PROJECT_HOSTNAME       = "${local.consulenv.PROJECT_HOSTNAME}"
-      }
+      } # end env
 
       # max 30mb (3 + 3 * 5mb)
       logs {
@@ -461,13 +461,18 @@ job "core" {
         max_file_size = 5
       }
 
+      service {
+        provider = "nomad"
+        tags     = ["core-consul"]
+      }
+
       # TODO: this shiz is wayyy off, check nomad ui and increase + surplus
       resources {
         memory = 256 # MB
         cpu    = 500
       }
-    }
-  }
+    } # end task
+  }   # end group
 
   group "proxy" {
     count = 1
@@ -487,7 +492,7 @@ job "core" {
         static = "${local.proxyenv.PROXY_PORT_VAULT}"
         to     = "${local.proxyenv.PROXY_PORT_VAULT}"
       }
-    }
+    } # end network
 
     restart {
       attempts = 0
@@ -502,7 +507,7 @@ job "core" {
 
     service {
       provider = "nomad"
-      name     = "core-proxy"
+      tags     = ["proxy"]
     }
 
     task "core-proxy" {
@@ -511,11 +516,6 @@ job "core" {
       user   = "root"
 
       config {
-        # TODO: haproxy has working docker healthchecks
-        healthchecks {
-          disable = true
-        }
-
         auth_soft_fail     = true # dont fail on auth errors
         entrypoint         = "${local.proxy.entrypoint}"
         extra_hosts        = "${local.proxy.extra_hosts}"
@@ -524,7 +524,13 @@ job "core" {
         image_pull_timeout = "1m"
         init               = true
         interactive        = false
-        ports              = ["proxy_edge", "proxy_stats", "proxy_vault"]
+
+        ports = ["proxy_edge", "proxy_stats", "proxy_vault"]
+
+        # TODO: haproxy has working docker healthchecks
+        healthchecks {
+          disable = true
+        }
 
         # TODO: these index mount points have the same issue as consuls
         mount { # consul/config
@@ -591,7 +597,7 @@ job "core" {
           target = "${local.proxykeys.host_combined.target}"
           source = "${local.proxykeys.host_combined.source}"
         }
-      }
+      } # end config
 
       env {
         CA_CERT                = "${local.proxyenv.CA_CERT}"
@@ -628,7 +634,7 @@ job "core" {
         PROXY_PORT_STATS       = "${local.proxyenv.PROXY_PORT_STATS}"
         PROXY_PORT_VAULT       = "${local.proxyenv.PROXY_PORT_VAULT}"
         VAULT_PORT_CUNT        = "${local.proxyenv.VAULT_PORT_CUNT}"
-      }
+      } # end env
 
       # max 30mb (3 + 3 * 5mb)
       logs {
@@ -641,8 +647,13 @@ job "core" {
         memory = 256 # MB
         cpu    = 500
       }
-    }
-  }
+
+      service {
+        provider = "nomad"
+        tags     = ["core-proxy"]
+      }
+    } # end task
+  }   # end group
 
   // group "vault_group" {
   //   count = 1
