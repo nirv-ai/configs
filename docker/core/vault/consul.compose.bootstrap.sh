@@ -87,8 +87,8 @@ start_consul() {
 echo "starting consul agent: $CONNECT_SIDECAR_FOR"
 start_consul &
 
-if test -f "${CBD}/pid.consul"; then
-  echo "consul pid saved: $(cat ${CBD}/pid.consul)"
+if test -f "${CBD}/${CONSUL_PID_FILE}"; then
+  echo "consul pid saved: $(cat ${CBD}/${CONSUL_PID_FILE})"
 else
   echo 'consul failed to create pidfile'
 fi
