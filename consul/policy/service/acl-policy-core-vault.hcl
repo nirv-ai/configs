@@ -1,9 +1,9 @@
 agent_prefix "core-vault" {
-  policy = "read"
+  policy = "write"
 }
 
 node_prefix "core-vault" {
-  policy = "read"
+  policy = "write"
 }
 
 service_prefix "core-vault" {
