@@ -6,7 +6,7 @@
 # sleep 3650d
 
 CBD=${CONSUL_DIR_BASE}          # consul base dir
-CFD=${CBD}/${CONSUL_DIR_CONFIG} # consul config dir
+CCD=${CBD}/${CONSUL_DIR_CONFIG} # consul config dir
 CDD=${CBD}/${CONSUL_DIR_DATA}   # consul data dir
 
 # re-export things
@@ -17,7 +17,7 @@ export CONSUL_TLS_SERVER_NAME=${MESH_SERVER_HOSTNAME}
 # let the server start without checking for tokens
 # as we may be bootstrapping a greenfield server
 # we set auto-reload-config to true so DO NOT remove this
-cat <<-EOF >${CFD}/env.token.hcl
+cat <<-EOF >${CCD}/env.token.hcl
   acl {
     tokens {
       agent  = "$CONSUL_HTTP_TOKEN"
@@ -27,7 +27,7 @@ cat <<-EOF >${CFD}/env.token.hcl
 EOF
 
 # create cert defaults from env vars
-cat <<-EOF >${CFD}/env.certs.hcl
+cat <<-EOF >${CCD}/env.certs.hcl
   tls {
     defaults {
       ca_file = "${CONSUL_CACERT}"
@@ -50,7 +50,7 @@ start_consul() {
     -auto-reload-config \
     -bind=${CONSUL_ADDR_BIND} \
     -client=${CONSUL_ADDR_CLIENT} \
-    -config-dir=${CFD} \
+    -config-dir=${CCD} \
     -data-dir=${CDD} \
     -datacenter=${DATACENTER} \
     -dns-port=${CONSUL_PORT_DNS} \
@@ -61,7 +61,6 @@ start_consul() {
     -https-port=${CONSUL_PORT_CUNT} \
     -node=${CONSUL_NODE_PREFIX}-$(hostname) \
     -pid-file=${CBD}/${CONSUL_PID_FILE} \
-    -retry-join=${CONSUL_SERVER} \
     -serf-lan-bind=${CONSUL_ADDR_BIND_LAN} \
     -serf-lan-port=${CONSUL_PORT_SERF_LAN} \
     -serf-wan-bind=${CONSUL_ADDR_BIND_WAN} \

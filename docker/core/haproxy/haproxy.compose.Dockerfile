@@ -4,7 +4,7 @@ FROM haproxytech/haproxy-ubuntu:2.7.1 AS haproxy_build
 
 ######################### consul, consul-template & envoy
 ## consul
-# removed su-exec, iputils
+## removed su-exec, iputils
 RUN \
   apt-get update && \
   apt-get upgrade -y && \
@@ -16,21 +16,24 @@ RUN \
 ARG CONSUL_VERSION=1.14.3
 ARG CONSUL_GID
 ARG CONSUL_UID
+ARG CONSUL_DIR_BASE
+ARG CONSUL_DIR_CONFIG
+ARG CONSUL_DIR_DATA
 
 ENV HASHICORP_RELEASES=https://releases.hashicorp.com
 RUN groupadd -r -g $CONSUL_GID consul && \
     useradd -ms /bin/sh -g consul -u $CONSUL_UID consul
-RUN mkdir -p /consul/data && \
-    mkdir -p /consul/config && \
-    chown -R consul:consul /consul
+RUN mkdir -p $CONSUL_DIR_BASE/$CONSUL_DIR_DATA && \
+    mkdir -p $CONSUL_DIR_BASE/$CONSUL_DIR_CONFIG && \
+    chown -R consul:consul $CONSUL_DIR_BASE
 RUN curl "${HASHICORP_RELEASES}/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip" -Lo /tmp/consul.zip && \
   unzip /tmp/consul.zip -d /usr/local/bin && \
   rm /tmp/consul.zip
 RUN test -e /etc/nsswitch.conf || echo 'hosts: files dns' > /etc/nsswitch.conf
-COPY --chown=consul:consul ./consul/consul.compose.bootstrap.sh ./consul
+COPY --chown=consul:consul ./consul/consul.compose.bootstrap.sh $CONSUL_DIR_BASE
 
 ## consul template
-# @see https://releases.hashicorp.com/consul-template
+## @see https://releases.hashicorp.com/consul-template
 ENV CT_VER=0.30.0
 
 RUN \
