@@ -1,6 +1,5 @@
 bootstrap_expect    = 1
 discovery_max_stale = "5s"
-server              = true
 
 rpc {
   enable_streaming = true
