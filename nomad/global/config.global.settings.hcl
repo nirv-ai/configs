@@ -1,3 +1,3 @@
-datacenter = "us_east"
+datacenter = "us-east"
 log_level  = "WARN"
 region     = "global"

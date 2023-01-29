@@ -5,7 +5,7 @@ variable "name" {
 }
 variable "NOMAD_DC" {
   type    = string
-  default = "us_east"
+  default = "us-east"
 }
 variable "NOMAD_REGION" {
   type    = string

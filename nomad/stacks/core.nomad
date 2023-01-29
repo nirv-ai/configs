@@ -1,7 +1,7 @@
 # internal
 variable "NOMAD_DC" {
   type    = string
-  default = "us_east"
+  default = "us-east"
 }
 variable "NOMAD_REGION" {
   type    = string
@@ -37,7 +37,6 @@ variable "services" {
         CONSUL_HTTP_TOKEN    = string
         CONSUL_NODE_PREFIX   = string
         CONSUL_PID_FILE      = string
-        CONSUL_PORT_CUNT     = string
         CONSUL_PORT_CUNT     = string
         CONSUL_PORT_DNS      = string
         CONSUL_PORT_GRPC     = string
@@ -442,30 +441,33 @@ job "core" {
       # ^ they can now be shared with downstream services via nomad vars
       # ^ and removed from consul task
       env {
-        CA_CERT                = "${local.consulenv.CA_CERT}"
-        CONSUL_ALT_DOMAIN      = "${local.consulenv.CONSUL_ALT_DOMAIN}"
-        CONSUL_CLIENT_CERT     = "${local.consulenv.CONSUL_CLIENT_CERT}"
-        CONSUL_CLIENT_KEY      = "${local.consulenv.CONSUL_CLIENT_KEY}"
-        CONSUL_CONFIG_DIR      = "${local.consulenv.CONSUL_CONFIG_DIR}"
-        CONSUL_DNS_TOKEN       = "${local.consulenv.CONSUL_DNS_TOKEN}"
-        CONSUL_ENVOY_PORT      = "${local.consulenv.CONSUL_ENVOY_PORT}"
-        CONSUL_FQDN_ADDR       = "${local.consulenv.CONSUL_FQDN_ADDR}"
-        CONSUL_GID             = "${local.consulenv.CONSUL_GID}"
-        CONSUL_HTTP_ADDR       = "${local.consulenv.CONSUL_HTTP_ADDR}"
-        CONSUL_HTTP_SSL        = "${local.consulenv.CONSUL_HTTP_SSL}"
-        CONSUL_HTTP_TOKEN      = "${local.consulenv.CONSUL_HTTP_TOKEN}"
-        CONSUL_NODE_PREFIX     = "${local.consulenv.CONSUL_NODE_PREFIX}"
-        CONSUL_PORT_CUNT       = "${local.consulenv.CONSUL_PORT_CUNT}"
-        CONSUL_PORT_DNS        = "${local.consulenv.CONSUL_PORT_DNS}"
-        CONSUL_PORT_SERF_LAN   = "${local.consulenv.CONSUL_PORT_SERF_LAN}"
-        CONSUL_PORT_SERF_WAN   = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
-        CONSUL_TLS_SERVER_NAME = "${local.consulenv.CONSUL_TLS_SERVER_NAME}"
-        CONSUL_UID             = "${local.consulenv.CONSUL_UID}"
-        ENVOY_GID              = "${local.consulenv.ENVOY_GID}"
-        ENVOY_UID              = "${local.consulenv.ENVOY_UID}"
-        MESH_HOSTNAME          = "${local.consulenv.MESH_HOSTNAME}"
-        MESH_SERVER_HOSTNAME   = "${local.consulenv.MESH_SERVER_HOSTNAME}"
-        PROJECT_HOSTNAME       = "${local.consulenv.PROJECT_HOSTNAME}"
+        CONSUL_ADDR_BIND     = "${local.consulenv.CONSUL_ADDR_BIND}"
+        CONSUL_ADDR_BIND_LAN = "${local.consulenv.CONSUL_ADDR_BIND_LAN}"
+        CONSUL_ADDR_BIND_WAN = "${local.consulenv.CONSUL_ADDR_BIND_WAN}"
+        CONSUL_ADDR_CLIENT   = "${local.consulenv.CONSUL_ADDR_CLIENT}"
+        CONSUL_ALT_DOMAIN    = "${local.consulenv.CONSUL_ALT_DOMAIN}"
+        CONSUL_CACERT        = "${local.consulenv.CONSUL_CACERT}"
+        CONSUL_CLIENT_CERT   = "${local.consulenv.CONSUL_CLIENT_CERT}"
+        CONSUL_CLIENT_KEY    = "${local.consulenv.CONSUL_CLIENT_KEY}"
+        CONSUL_DIR_BASE      = "${local.consulenv.CONSUL_DIR_BASE}"
+        CONSUL_DIR_CONFIG    = "${local.consulenv.CONSUL_DIR_CONFIG}"
+        CONSUL_DIR_DATA      = "${local.consulenv.CONSUL_DIR_DATA}"
+        CONSUL_DNS_TOKEN     = "${local.consulenv.CONSUL_DNS_TOKEN}"
+        CONSUL_ENVOY_PORT    = "${local.consulenv.CONSUL_ENVOY_PORT}"
+        CONSUL_GID           = "${local.consulenv.CONSUL_GID}"
+        CONSUL_HTTP_TOKEN    = "${local.consulenv.CONSUL_HTTP_TOKEN}"
+        CONSUL_NODE_PREFIX   = "${local.consulenv.CONSUL_NODE_PREFIX}"
+        CONSUL_PID_FILE      = "${local.consulenv.CONSUL_PID_FILE}"
+        CONSUL_PORT_CUNT     = "${local.consulenv.CONSUL_PORT_CUNT}"
+        CONSUL_PORT_DNS      = "${local.consulenv.CONSUL_PORT_DNS}"
+        CONSUL_PORT_GRPC     = "${local.consulenv.CONSUL_PORT_GRPC}"
+        CONSUL_PORT_SERF_LAN = "${local.consulenv.CONSUL_PORT_SERF_LAN}"
+        CONSUL_PORT_SERF_WAN = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
+        CONSUL_PORT_SERVER   = "${local.consulenv.CONSUL_PORT_SERVER}"
+        CONSUL_UID           = "${local.consulenv.CONSUL_UID}"
+        DATACENTER           = "${local.consulenv.DATACENTER}"
+        MESH_HOSTNAME        = "${local.consulenv.MESH_HOSTNAME}"
+        MESH_SERVER_HOSTNAME = "${local.consulenv.MESH_SERVER_HOSTNAME}"
       } # end env
 
       # max 30mb (3 + 3 * 5mb)
