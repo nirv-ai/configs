@@ -4,9 +4,8 @@ retry_max             = 0
 server                = false
 use_streaming_backend = true
 
-# this needs to match the docker service name
-retry_join = ["core-consul"]
-
 auto_encrypt {
+  # TODO: pretty sure this should be true
+  # or maybe its false because we provide the cert files?
   tls = false
 }
