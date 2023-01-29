@@ -1,3 +1,4 @@
+# TODO: move to cli for 12factor
 ports {
   dns              = 8600
   expose_max_port  = 0

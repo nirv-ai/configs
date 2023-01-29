@@ -1,3 +1,4 @@
+# TODO: move file locations to cli for 12factor
 tls {
   internal_rpc {
     verify_server_hostname = true
@@ -12,7 +13,7 @@ tls {
 
     # @see https://discuss.hashicorp.com/t/access-consul-web-interface-with-verify-incoming-true/39121
     # make sure to create a p12 cert via script.ssl.sh create p12
-    # and install it into your browser
+    # and install it in your browser
     verify_incoming = true
     verify_outgoing = true
   }

@@ -1,3 +1,4 @@
+# TODO: move addrs and file locations to cli for 12factor
 alt_domain                           = "search"
 auto_reload_config                   = true
 bind_addr                            = "0.0.0.0"
