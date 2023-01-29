@@ -85,7 +85,6 @@ variable "services" {
         CONSUL_NODE_PREFIX   = string
         CONSUL_PID_FILE      = string
         CONSUL_PORT_CUNT     = string
-        CONSUL_PORT_CUNT     = string
         CONSUL_PORT_DNS      = string
         CONSUL_PORT_GRPC     = string
         CONSUL_PORT_SERF_LAN = string
@@ -260,12 +259,9 @@ variable "x-deploy" {}
 variable "x-service-defaults" {}
 variable "x-service-healthcheck" {}
 
-# vars from env file should not be used directly
-# instead place them here and always use ${local.poop.boop.soup}
 locals {
   # TODO: cert related files should be placed in nomad secrets
-  # and applications should retrieve the locations from envars
-  # ^ this should work even if set in confs, as envvars i believe override confs
+  # ^ we can now resolve this via env vars
   # job
   jobkeys = {
     ca = {
@@ -437,9 +433,6 @@ job "core" {
         }
       } # end config
 
-      # TODO: most of these arent needed for consul
-      # ^ they can now be shared with downstream services via nomad vars
-      # ^ and removed from consul task
       env {
         CONSUL_ADDR_BIND     = "${local.consulenv.CONSUL_ADDR_BIND}"
         CONSUL_ADDR_BIND_LAN = "${local.consulenv.CONSUL_ADDR_BIND_LAN}"
@@ -611,40 +604,49 @@ job "core" {
       } # end config
 
       env {
-        CA_CERT                = "${local.proxyenv.CA_CERT}"
-        CERTS_DIR_CUNT         = "${local.proxyenv.CERTS_DIR_CUNT}"
-        CERTS_DIR_HOST         = "${local.proxyenv.CERTS_DIR_HOST}"
-        CONSUL_ALT_DOMAIN      = "${local.proxyenv.CONSUL_ALT_DOMAIN}"
-        CONSUL_CACERT          = "${local.proxyenv.CONSUL_CACERT}"
-        CONSUL_CLIENT_CERT     = "${local.proxyenv.CONSUL_CLIENT_CERT}"
-        CONSUL_CLIENT_KEY      = "${local.proxyenv.CONSUL_CLIENT_KEY}"
-        CONSUL_CONFIG_DIR      = "${local.proxyenv.CONSUL_CONFIG_DIR}"
-        CONSUL_ENVOY_PORT      = "${local.proxyenv.CONSUL_ENVOY_PORT}"
-        CONSUL_FQDN_ADDR       = "${local.proxyenv.CONSUL_FQDN_ADDR}"
-        CONSUL_GID             = "${local.proxyenv.CONSUL_GID}"
-        CONSUL_HTTP_ADDR       = "${local.proxyenv.CONSUL_HTTP_ADDR}"
-        CONSUL_HTTP_SSL        = "${local.proxyenv.CONSUL_HTTP_SSL}"
-        CONSUL_HTTP_TOKEN      = "${local.proxyenv.CONSUL_HTTP_TOKEN}"
-        CONSUL_NODE_PREFIX     = "${local.proxyenv.CONSUL_NODE_PREFIX}"
-        CONSUL_PORT_CUNT       = "${local.proxyenv.CONSUL_PORT_CUNT}"
-        CONSUL_PORT_DNS        = "${local.proxyenv.CONSUL_PORT_DNS}"
-        CONSUL_PORT_SERF_LAN   = "${local.proxyenv.CONSUL_PORT_SERF_LAN}"
-        CONSUL_PORT_SERF_WAN   = "${local.proxyenv.CONSUL_PORT_SERF_WAN}"
-        CONSUL_TLS_SERVER_NAME = "${local.proxyenv.CONSUL_TLS_SERVER_NAME}"
-        CONSUL_UID             = "${local.proxyenv.CONSUL_UID}"
-        ENVOY_GID              = "${local.proxyenv.ENVOY_GID}"
-        ENVOY_UID              = "${local.proxyenv.ENVOY_UID}"
-        MESH_HOSTNAME          = "${local.proxyenv.MESH_HOSTNAME}"
-        MESH_SERVER_HOSTNAME   = "${local.proxyenv.MESH_SERVER_HOSTNAME}"
-        PROJECT_CERTS          = "${local.proxyenv.PROJECT_CERTS}"
-        PROJECT_DOMAIN_NAME    = "${local.proxyenv.PROJECT_DOMAIN_NAME}"
-        PROJECT_HOSTNAME       = "${local.proxyenv.PROJECT_HOSTNAME}"
-        PROXY_AUTH_NAME        = "${local.proxyenv.PROXY_AUTH_NAME}"
-        PROXY_AUTH_PASS        = "${local.proxyenv.PROXY_AUTH_PASS}"
-        PROXY_PORT_EDGE        = "${local.proxyenv.PROXY_PORT_EDGE}"
-        PROXY_PORT_STATS       = "${local.proxyenv.PROXY_PORT_STATS}"
-        PROXY_PORT_VAULT       = "${local.proxyenv.PROXY_PORT_VAULT}"
-        VAULT_PORT_CUNT        = "${local.proxyenv.VAULT_PORT_CUNT}"
+        CERTS_DIR_CUNT       = "${local.proxyenv.CERTS_DIR_CUNT}"
+        CONSUL_ADDR_BIND     = "${local.proxyenv.CONSUL_ADDR_BIND}"
+        CONSUL_ADDR_BIND_LAN = "${local.proxyenv.CONSUL_ADDR_BIND_LAN}"
+        CONSUL_ADDR_BIND_WAN = "${local.proxyenv.CONSUL_ADDR_BIND_WAN}"
+        CONSUL_ADDR_CLIENT   = "${local.proxyenv.CONSUL_ADDR_CLIENT}"
+        CONSUL_ALT_DOMAIN    = "${local.proxyenv.CONSUL_ALT_DOMAIN}"
+        CONSUL_CACERT        = "${local.proxyenv.CONSUL_CACERT}"
+        CONSUL_CLIENT_CERT   = "${local.proxyenv.CONSUL_CLIENT_CERT}"
+        CONSUL_CLIENT_KEY    = "${local.proxyenv.CONSUL_CLIENT_KEY}"
+        CONSUL_DIR_BASE      = "${local.proxyenv.CONSUL_DIR_BASE}"
+        CONSUL_DIR_CONFIG    = "${local.proxyenv.CONSUL_DIR_CONFIG}"
+        CONSUL_DIR_DATA      = "${local.proxyenv.CONSUL_DIR_DATA}"
+        CONSUL_ENVOY_PORT    = "${local.proxyenv.CONSUL_ENVOY_PORT}"
+        CONSUL_GID           = "${local.proxyenv.CONSUL_GID}"
+        CONSUL_HTTP_TOKEN    = "${local.proxyenv.CONSUL_HTTP_TOKEN}"
+        CONSUL_NODE_PREFIX   = "${local.proxyenv.CONSUL_NODE_PREFIX}"
+        CONSUL_PID_FILE      = "${local.proxyenv.CONSUL_PID_FILE}"
+        CONSUL_PORT_CUNT     = "${local.proxyenv.CONSUL_PORT_CUNT}"
+        CONSUL_PORT_DNS      = "${local.proxyenv.CONSUL_PORT_DNS}"
+        CONSUL_PORT_GRPC     = "${local.proxyenv.CONSUL_PORT_GRPC}"
+        CONSUL_PORT_SERF_LAN = "${local.proxyenv.CONSUL_PORT_SERF_LAN}"
+        CONSUL_PORT_SERF_WAN = "${local.proxyenv.CONSUL_PORT_SERF_WAN}"
+        CONSUL_PORT_SERVER   = "${local.proxyenv.CONSUL_PORT_SERVER}"
+        CONSUL_UID           = "${local.proxyenv.CONSUL_UID}"
+        DATACENTER           = "${local.proxyenv.DATACENTER}"
+        MESH_HOSTNAME        = "${local.proxyenv.MESH_HOSTNAME}"
+        MESH_SERVER_HOSTNAME = "${local.proxyenv.MESH_SERVER_HOSTNAME}"
+        PROJECT_CERTS        = "${local.proxyenv.PROJECT_CERTS}" # e.g. dev.nirv.ai
+        PROJECT_DOMAIN_NAME  = "${local.proxyenv.PROJECT_DOMAIN_NAME}"
+        PROJECT_HOSTNAME     = "${local.proxyenv.PROJECT_HOSTNAME}"
+        PROXY_AUTH_NAME      = "${local.proxyenv.PROXY_AUTH_NAME}"
+        PROXY_AUTH_PASS      = "${local.proxyenv.PROXY_AUTH_PASS}"
+        PROXY_PORT_EDGE      = "${local.proxyenv.PROXY_PORT_EDGE}"
+        PROXY_PORT_STATS     = "${local.proxyenv.PROXY_PORT_STATS}"
+        PROXY_PORT_VAULT     = "${local.proxyenv.PROXY_PORT_VAULT}"
+        PROXY_PORT_WEB_H     = "${local.proxyenv.PROXY_PORT_WEB_H}"
+        PROXY_PORT_WEB_S     = "${local.proxyenv.PROXY_PORT_WEB_S}"
+        VAULT_HOSTNAME       = "${local.proxyenv.VAULT_HOSTNAME}"
+        VAULT_PORT_CUNT      = "${local.proxyenv.VAULT_PORT_CUNT}"
+        WEB_BFF_HOSTNAME     = "${local.proxyenv.WEB_BFF_HOSTNAME}"
+        WEB_BFF_PORT         = "${local.proxyenv.WEB_BFF_PORT}"
+        WEB_UI_HOSTNAME      = "${local.proxyenv.WEB_UI_HOSTNAME}"
+        WEB_UI_PORT          = "${local.proxyenv.WEB_UI_PORT}"
       } # end env
 
       # max 30mb (3 + 3 * 5mb)
