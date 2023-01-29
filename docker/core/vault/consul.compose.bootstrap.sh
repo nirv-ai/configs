@@ -60,7 +60,6 @@ fi
 
 start_consul() {
   consul agent \
-    -node=${CONNECT_SIDECAR_FOR} \
     -advertise='{{ GetInterfaceIP "eth0" }}' \
     -alt-domain=${CONSUL_ALT_DOMAIN} \
     -auto-reload-config \
@@ -75,7 +74,7 @@ start_consul() {
     -grpc-tls-port=${CONSUL_PORT_GRPC} \
     -http-port=-1 \
     -https-port=${CONSUL_PORT_CUNT} \
-    -node=${CONSUL_NODE_PREFIX}-$(hostname) \
+    -node=${CONNECT_SIDECAR_FOR} \
     -pid-file=${CBD}/${CONSUL_PID_FILE} \
     -retry-join=${CONSUL_SERVER} \
     -serf-lan-bind=${CONSUL_ADDR_BIND_LAN} \
@@ -88,8 +87,8 @@ start_consul() {
 echo "starting consul agent: $CONNECT_SIDECAR_FOR"
 start_consul &
 
-if test -f "${CBD}/pid.consul"; then
-  echo "consul pid saved: $(cat ${CBD}/pid.consul)"
+if test -f "${CBD}/${CONSUL_PID_FILE}"; then
+  echo "consul pid saved: $(cat ${CBD}/${CONSUL_PID_FILE})"
 else
   echo 'consul failed to create pidfile'
 fi

@@ -1,9 +1,9 @@
 agent_prefix "core-proxy" {
-  policy = "read"
+  policy = "write"
 }
 
 node_prefix "core-proxy" {
-  policy = "read"
+  policy = "write"
 }
 
 service_prefix "core-proxy" {
