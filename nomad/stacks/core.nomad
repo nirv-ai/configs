@@ -68,6 +68,13 @@ variable "services" {
       extra_hosts = list(string)
 
       environment = object({
+        // PROXY_PORT_WEB_H     = string
+        // PROXY_PORT_WEB_S     = string
+        // VAULT_HOSTNAME       = string
+        // WEB_BFF_HOSTNAME     = string
+        // WEB_BFF_PORT         = string
+        // WEB_UI_HOSTNAME      = string
+        // WEB_UI_PORT          = string
         CERTS_DIR_CUNT       = string
         CONSUL_ADDR_BIND     = string
         CONSUL_ADDR_BIND_LAN = string
@@ -80,6 +87,7 @@ variable "services" {
         CONSUL_DIR_BASE      = string
         CONSUL_DIR_CONFIG    = string
         CONSUL_DIR_DATA      = string
+        CONSUL_ENVOY_PORT    = string # TODO: need to pull this out of envoy config
         CONSUL_GID           = string
         CONSUL_HTTP_TOKEN    = string
         CONSUL_NODE_PREFIX   = string
@@ -102,14 +110,7 @@ variable "services" {
         PROXY_PORT_EDGE      = string
         PROXY_PORT_STATS     = string
         PROXY_PORT_VAULT     = string
-        PROXY_PORT_WEB_H     = string
-        PROXY_PORT_WEB_S     = string
-        VAULT_HOSTNAME       = string
         VAULT_PORT_CUNT      = string
-        WEB_BFF_HOSTNAME     = string
-        WEB_BFF_PORT         = string
-        WEB_UI_HOSTNAME      = string
-        WEB_UI_PORT          = string
       })
       ports = list(object({
         mode      = string
@@ -446,7 +447,6 @@ job "core" {
         CONSUL_DIR_CONFIG    = "${local.consulenv.CONSUL_DIR_CONFIG}"
         CONSUL_DIR_DATA      = "${local.consulenv.CONSUL_DIR_DATA}"
         CONSUL_DNS_TOKEN     = "${local.consulenv.CONSUL_DNS_TOKEN}"
-        CONSUL_ENVOY_PORT    = "${local.consulenv.CONSUL_ENVOY_PORT}"
         CONSUL_GID           = "${local.consulenv.CONSUL_GID}"
         CONSUL_HTTP_TOKEN    = "${local.consulenv.CONSUL_HTTP_TOKEN}"
         CONSUL_NODE_PREFIX   = "${local.consulenv.CONSUL_NODE_PREFIX}"
@@ -604,6 +604,13 @@ job "core" {
       } # end config
 
       env {
+        // PROXY_PORT_WEB_H     = "${local.proxyenv.PROXY_PORT_WEB_H}"
+        // PROXY_PORT_WEB_S     = "${local.proxyenv.PROXY_PORT_WEB_S}"
+        // VAULT_HOSTNAME       = "${local.proxyenv.VAULT_HOSTNAME}"
+        // WEB_BFF_HOSTNAME     = "${local.proxyenv.WEB_BFF_HOSTNAME}"
+        // WEB_BFF_PORT         = "${local.proxyenv.WEB_BFF_PORT}"
+        // WEB_UI_HOSTNAME      = "${local.proxyenv.WEB_UI_HOSTNAME}"
+        // WEB_UI_PORT          = "${local.proxyenv.WEB_UI_PORT}"
         CERTS_DIR_CUNT       = "${local.proxyenv.CERTS_DIR_CUNT}"
         CONSUL_ADDR_BIND     = "${local.proxyenv.CONSUL_ADDR_BIND}"
         CONSUL_ADDR_BIND_LAN = "${local.proxyenv.CONSUL_ADDR_BIND_LAN}"
@@ -639,14 +646,7 @@ job "core" {
         PROXY_PORT_EDGE      = "${local.proxyenv.PROXY_PORT_EDGE}"
         PROXY_PORT_STATS     = "${local.proxyenv.PROXY_PORT_STATS}"
         PROXY_PORT_VAULT     = "${local.proxyenv.PROXY_PORT_VAULT}"
-        PROXY_PORT_WEB_H     = "${local.proxyenv.PROXY_PORT_WEB_H}"
-        PROXY_PORT_WEB_S     = "${local.proxyenv.PROXY_PORT_WEB_S}"
-        VAULT_HOSTNAME       = "${local.proxyenv.VAULT_HOSTNAME}"
         VAULT_PORT_CUNT      = "${local.proxyenv.VAULT_PORT_CUNT}"
-        WEB_BFF_HOSTNAME     = "${local.proxyenv.WEB_BFF_HOSTNAME}"
-        WEB_BFF_PORT         = "${local.proxyenv.WEB_BFF_PORT}"
-        WEB_UI_HOSTNAME      = "${local.proxyenv.WEB_UI_HOSTNAME}"
-        WEB_UI_PORT          = "${local.proxyenv.WEB_UI_PORT}"
       } # end env
 
       # max 30mb (3 + 3 * 5mb)
