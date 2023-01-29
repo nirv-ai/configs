@@ -96,12 +96,8 @@ services:
       - ${MESH_SERVER_HOSTNAME}:127.0.0.1
     networks:
       corenetwork:
-        # aliases:
-        #   - ${MESH_HOSTNAME}
-        #   - ${MESH_SERVER_HOSTNAME}
-        #   - consul
     ports:
-      - "${CONSUL_PORT_CUNT}:${CONSUL_PORT_CUNT}"
+      - "${CONSUL_PORT_HOST}:${CONSUL_PORT_CUNT}"
       - "${CONSUL_PORT_SERF_LAN}/tcp"
       - "${CONSUL_PORT_SERF_WAN}/tcp"
       - "${CONSUL_PORT_DNS}/tcp"
@@ -118,8 +114,11 @@ services:
     image: ${REG_HOSTNAME}:${REG_PORT_HOST}/${COMPOSE_PROJECT_NAME}/core-consul:${ENV:?environment is required}
     build:
       args:
-        CONSUL_UID:
+        CONSUL_DIR_BASE:
+        CONSUL_DIR_CONFIG:
+        CONSUL_DIR_DATA:
         CONSUL_GID:
+        CONSUL_UID:
       context: ./apps/nirvai-core-consul/src
       dockerfile: ./consul.compose.Dockerfile
 
@@ -158,8 +157,11 @@ services:
     image: ${REG_HOSTNAME}:${REG_PORT_HOST}/${COMPOSE_PROJECT_NAME}/core-proxy:${ENV:?environment is required}
     build:
       args:
-        CONSUL_UID:
+        CONSUL_DIR_BASE:
+        CONSUL_DIR_CONFIG:
+        CONSUL_DIR_DATA:
         CONSUL_GID:
+        CONSUL_UID:
       context: ./apps/nirvai-core-proxy/src
       dockerfile: ./haproxy.compose.Dockerfile
 
@@ -200,8 +202,11 @@ services:
     image: ${REG_HOSTNAME}:${REG_PORT_HOST}/${COMPOSE_PROJECT_NAME}/core-vault:${ENV:?environment is required}
     build:
       args:
-        CONSUL_UID:
+        CONSUL_DIR_BASE:
+        CONSUL_DIR_CONFIG:
+        CONSUL_DIR_DATA:
         CONSUL_GID:
+        CONSUL_UID:
       context: ./apps/nirvai-core-vault/src
       dockerfile: ./vault.compose.Dockerfile
 

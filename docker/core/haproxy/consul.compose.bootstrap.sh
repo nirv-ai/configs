@@ -12,6 +12,7 @@ CDD=${CBD}/${CONSUL_DIR_DATA}   # consul data dir
 # we renamed them for sorting alphabetically
 export CONSUL_HTTP_ADDR=https://${MESH_HOSTNAME}:${CONSUL_PORT_CUNT}
 export CONSUL_TLS_SERVER_NAME=${MESH_SERVER_HOSTNAME}
+export CONSUL_FQDN_ADDR=${MESH_HOSTNAME}
 export CONNECT_SIDECAR_FOR=$CONSUL_NODE_PREFIX-$(hostname)
 
 # this runs in client mode, not server
