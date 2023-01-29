@@ -358,7 +358,8 @@ job "core" {
 
     service {
       provider = "nomad"
-      tags     = ["consul"]
+      tags     = ["consul", "core-consul"]
+      task     = "core-consul"
     }
 
     task "core-consul" {
@@ -461,11 +462,6 @@ job "core" {
         max_file_size = 5
       }
 
-      service {
-        provider = "nomad"
-        tags     = ["core-consul"]
-      }
-
       # TODO: this shiz is wayyy off, check nomad ui and increase + surplus
       resources {
         memory = 256 # MB
@@ -507,7 +503,8 @@ job "core" {
 
     service {
       provider = "nomad"
-      tags     = ["proxy"]
+      tags     = ["proxy", "core-proxy"]
+      task     = "core-proxy"
     }
 
     task "core-proxy" {
@@ -646,11 +643,6 @@ job "core" {
       resources {
         memory = 256 # MB
         cpu    = 500
-      }
-
-      service {
-        provider = "nomad"
-        tags     = ["core-proxy"]
       }
     } # end task
   }   # end group
