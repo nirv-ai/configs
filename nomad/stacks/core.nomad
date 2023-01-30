@@ -261,7 +261,8 @@ variable "x-service-healthcheck" {}
 
 locals {
   # TODO: cert related files should be placed in nomad secrets
-  # ^ we can now resolve this via env vars
+  # ^ and the file locations placed in env vars
+
   # job
   jobkeys = {
     ca = {
@@ -683,13 +684,14 @@ job "core" {
 
       template {
         change_mode = "restart"
-        destination = "local/testing.hcl"
-        env = false
+        destination = "local/nomad.env"
+        env = true
+        uid = "${local.proxyenv.CONSUL_UID}"
+        gid = "${local.proxyenv.CONSUL_GID}"
         data = <<EOH
-          upstream my_app {
             {{- range nomadService "core-consul" }}
-            server {{ .Address }}:{{ .Port }};{{- end }}
-          }
+            CONSUL_SERVER = {{ .Address }}
+            {{- end }}
         EOH
       }
     } # end task
