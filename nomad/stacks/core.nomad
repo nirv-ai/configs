@@ -370,7 +370,8 @@ job "core" {
     service {
       provider = "nomad"
       tags     = ["consul", "core-consul"]
-      task     = "core-consul"
+      address_mode = "host"
+      port = "consul_serf_lan"
     }
 
     task "core-consul" {
@@ -690,7 +691,8 @@ job "core" {
         gid = "${local.proxyenv.CONSUL_GID}"
         data = <<EOH
             {{- range nomadService "core-consul" }}
-            CONSUL_SERVER = {{ .Address }}
+            CONSUL_SERVER = {{ .Address }}:{{.Port}}
+
             {{- end }}
         EOH
       }
