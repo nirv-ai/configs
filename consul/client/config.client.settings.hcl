@@ -1,7 +1,6 @@
-rejoin_after_leave    = true
+rejoin_after_leave    = false
 retry_interval        = "10s"
 retry_max             = 0
-server                = false
 use_streaming_backend = true
 
 auto_encrypt {

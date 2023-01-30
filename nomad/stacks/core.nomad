@@ -318,9 +318,9 @@ job "core" {
     value     = "linux"
   }
 
-  meta {
-    run_uuid = "${uuidv4()}" # turn off in prod
-  }
+  // meta {
+  //   run_uuid = "${uuidv4()}" # turn off in prod
+  // }
 
   # temp disable until we get this shiz figured out
   reschedule {
@@ -679,6 +679,18 @@ job "core" {
       resources {
         memory = 256 # MB
         cpu    = 500
+      }
+
+      template {
+        change_mode = "restart"
+        destination = "local/testing.hcl"
+        env = false
+        data = <<EOH
+          upstream my_app {
+            {{- range nomadService "core-consul" }}
+            server {{ .Address }}:{{ .Port }};{{- end }}
+          }
+        EOH
       }
     } # end task
   }   # end group
