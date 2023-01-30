@@ -37,6 +37,7 @@ variable "services" {
         CONSUL_HTTP_TOKEN    = string
         CONSUL_NODE_PREFIX   = string
         CONSUL_PID_FILE      = string
+        CONSUL_PORT_HOST     = string
         CONSUL_PORT_CUNT     = string
         CONSUL_PORT_DNS      = string
         CONSUL_PORT_GRPC     = string
@@ -334,20 +335,23 @@ job "core" {
       mode = "bridge"
 
       port "consul_ui" {
-        static = "${local.consulenv.CONSUL_PORT_CUNT}"
+        static = "${local.consulenv.CONSUL_PORT_HOST}"
         to     = "${local.consulenv.CONSUL_PORT_CUNT}"
       }
       port "consul_dns" {
-        static = "${local.consulenv.CONSUL_PORT_DNS}"
         to     = "${local.consulenv.CONSUL_PORT_DNS}"
       }
+      port "consul_grpc" {
+        to     = "${local.consulenv.CONSUL_PORT_GRPC}"
+      }
       port "consul_serf_lan" {
-        static = "${local.consulenv.CONSUL_PORT_SERF_LAN}"
         to     = "${local.consulenv.CONSUL_PORT_SERF_LAN}"
       }
       port "consul_serf_wan" {
-        static = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
         to     = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
+      }
+      port "consul_server" {
+        to     = "${local.consulenv.CONSUL_PORT_SERVER}"
       }
     }
 
@@ -450,11 +454,11 @@ job "core" {
         CONSUL_NODE_PREFIX   = "${local.consulenv.CONSUL_NODE_PREFIX}"
         CONSUL_PID_FILE      = "${local.consulenv.CONSUL_PID_FILE}"
         CONSUL_PORT_CUNT     = "${local.consulenv.CONSUL_PORT_CUNT}"
-        CONSUL_PORT_DNS      = "${local.consulenv.CONSUL_PORT_DNS}"
-        CONSUL_PORT_GRPC     = "${local.consulenv.CONSUL_PORT_GRPC}"
-        CONSUL_PORT_SERF_LAN = "${local.consulenv.CONSUL_PORT_SERF_LAN}"
-        CONSUL_PORT_SERF_WAN = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
-        CONSUL_PORT_SERVER   = "${local.consulenv.CONSUL_PORT_SERVER}"
+        CONSUL_PORT_DNS      = "${NOMAD_PORT_consul_dns}"
+        CONSUL_PORT_GRPC     = "${NOMAD_PORT_consul_grpc}"
+        CONSUL_PORT_SERF_LAN = "${NOMAD_PORT_consul_serf_lan}"
+        CONSUL_PORT_SERF_WAN = "${NOMAD_PORT_consul_serf_wan}"
+        CONSUL_PORT_SERVER   = "${NOMAD_PORT_consul_server}"
         CONSUL_UID           = "${local.consulenv.CONSUL_UID}"
         DATACENTER           = "${var.NOMAD_DC}"
         MESH_HOSTNAME        = "${local.consulenv.MESH_HOSTNAME}"
@@ -492,6 +496,24 @@ job "core" {
       port "proxy_vault" {
         static = "${local.proxyenv.PROXY_PORT_VAULT}"
         to     = "${local.proxyenv.PROXY_PORT_VAULT}"
+      }
+      port "consul_cunt" {
+        to     = "${local.proxyenv.CONSUL_PORT_CUNT}"
+      }
+      port "consul_dns" {
+        to     = "${local.proxyenv.CONSUL_PORT_DNS}"
+      }
+      port "consul_grpc" {
+        to     = "${local.proxyenv.CONSUL_PORT_GRPC}"
+      }
+      port "consul_serf_lan" {
+        to     = "${local.proxyenv.CONSUL_PORT_SERF_LAN}"
+      }
+      port "consul_serf_wan" {
+        to     = "${local.proxyenv.CONSUL_PORT_SERF_WAN}"
+      }
+      port "consul_server" {
+        to     = "${local.proxyenv.CONSUL_PORT_SERVER}"
       }
     } # end network
 
@@ -605,6 +627,7 @@ job "core" {
         // PROXY_PORT_WEB_H     = "${local.proxyenv.PROXY_PORT_WEB_H}"
         // PROXY_PORT_WEB_S     = "${local.proxyenv.PROXY_PORT_WEB_S}"
         // VAULT_HOSTNAME       = "${local.proxyenv.VAULT_HOSTNAME}"
+        // VAULT_PORT_CUNT      = "${local.proxyenv.VAULT_PORT_CUNT}"
         // WEB_BFF_HOSTNAME     = "${local.proxyenv.WEB_BFF_HOSTNAME}"
         // WEB_BFF_PORT         = "${local.proxyenv.WEB_BFF_PORT}"
         // WEB_UI_HOSTNAME      = "${local.proxyenv.WEB_UI_HOSTNAME}"
@@ -626,12 +649,12 @@ job "core" {
         CONSUL_HTTP_TOKEN    = "${local.proxyenv.CONSUL_HTTP_TOKEN}"
         CONSUL_NODE_PREFIX   = "${local.proxyenv.CONSUL_NODE_PREFIX}"
         CONSUL_PID_FILE      = "${local.proxyenv.CONSUL_PID_FILE}"
-        CONSUL_PORT_CUNT     = "${local.proxyenv.CONSUL_PORT_CUNT}"
-        CONSUL_PORT_DNS      = "${local.proxyenv.CONSUL_PORT_DNS}"
-        CONSUL_PORT_GRPC     = "${local.proxyenv.CONSUL_PORT_GRPC}"
-        CONSUL_PORT_SERF_LAN = "${local.proxyenv.CONSUL_PORT_SERF_LAN}"
-        CONSUL_PORT_SERF_WAN = "${local.proxyenv.CONSUL_PORT_SERF_WAN}"
-        CONSUL_PORT_SERVER   = "${local.proxyenv.CONSUL_PORT_SERVER}"
+        CONSUL_PORT_CUNT      = "${NOMAD_PORT_consul_cunt}"
+        CONSUL_PORT_DNS      = "${NOMAD_PORT_consul_dns}"
+        CONSUL_PORT_GRPC     = "${NOMAD_PORT_consul_grpc}"
+        CONSUL_PORT_SERF_LAN = "${NOMAD_PORT_consul_serf_lan}"
+        CONSUL_PORT_SERF_WAN = "${NOMAD_PORT_consul_serf_wan}"
+        CONSUL_PORT_SERVER   = "${NOMAD_PORT_consul_server}"
         CONSUL_UID           = "${local.proxyenv.CONSUL_UID}"
         DATACENTER           = "${var.NOMAD_DC}"
         MESH_HOSTNAME        = "${local.proxyenv.MESH_HOSTNAME}"
@@ -641,10 +664,9 @@ job "core" {
         PROJECT_HOSTNAME     = "${local.proxyenv.PROJECT_HOSTNAME}"
         PROXY_AUTH_NAME      = "${local.proxyenv.PROXY_AUTH_NAME}"
         PROXY_AUTH_PASS      = "${local.proxyenv.PROXY_AUTH_PASS}"
-        PROXY_PORT_EDGE      = "${local.proxyenv.PROXY_PORT_EDGE}"
-        PROXY_PORT_STATS     = "${local.proxyenv.PROXY_PORT_STATS}"
-        PROXY_PORT_VAULT     = "${local.proxyenv.PROXY_PORT_VAULT}"
-        VAULT_PORT_CUNT      = "${local.proxyenv.VAULT_PORT_CUNT}"
+        PROXY_PORT_EDGE      = "${NOMAD_PORT_proxy_edge}"
+        PROXY_PORT_STATS     = "${NOMAD_PORT_proxy_stats}"
+        PROXY_PORT_VAULT     = "${NOMAD_PORT_proxy_vault}"
       } # end env
 
       # max 30mb (3 + 3 * 5mb)
