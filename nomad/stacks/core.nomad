@@ -44,7 +44,6 @@ variable "services" {
         CONSUL_PORT_SERF_WAN = string
         CONSUL_PORT_SERVER   = string
         CONSUL_UID           = string
-        DATACENTER           = string
         MESH_HOSTNAME        = string
         MESH_SERVER_HOSTNAME = string
       })
@@ -99,7 +98,6 @@ variable "services" {
         CONSUL_PORT_SERF_WAN = string
         CONSUL_PORT_SERVER   = string
         CONSUL_UID           = string
-        DATACENTER           = string
         MESH_HOSTNAME        = string
         MESH_SERVER_HOSTNAME = string
         PROJECT_CERTS        = string # e.g. dev.nirv.ai cert
@@ -458,7 +456,7 @@ job "core" {
         CONSUL_PORT_SERF_WAN = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
         CONSUL_PORT_SERVER   = "${local.consulenv.CONSUL_PORT_SERVER}"
         CONSUL_UID           = "${local.consulenv.CONSUL_UID}"
-        DATACENTER           = "${local.consulenv.DATACENTER}"
+        DATACENTER           = "${var.NOMAD_DC}"
         MESH_HOSTNAME        = "${local.consulenv.MESH_HOSTNAME}"
         MESH_SERVER_HOSTNAME = "${local.consulenv.MESH_SERVER_HOSTNAME}"
       } # end env
@@ -635,7 +633,7 @@ job "core" {
         CONSUL_PORT_SERF_WAN = "${local.proxyenv.CONSUL_PORT_SERF_WAN}"
         CONSUL_PORT_SERVER   = "${local.proxyenv.CONSUL_PORT_SERVER}"
         CONSUL_UID           = "${local.proxyenv.CONSUL_UID}"
-        DATACENTER           = "${local.proxyenv.DATACENTER}"
+        DATACENTER           = "${var.NOMAD_DC}"
         MESH_HOSTNAME        = "${local.proxyenv.MESH_HOSTNAME}"
         MESH_SERVER_HOSTNAME = "${local.proxyenv.MESH_SERVER_HOSTNAME}"
         PROJECT_CERTS        = "${local.proxyenv.PROJECT_CERTS}" # e.g. dev.nirv.ai
