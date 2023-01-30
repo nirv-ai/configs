@@ -340,19 +340,19 @@ job "core" {
         to     = "${local.consulenv.CONSUL_PORT_CUNT}"
       }
       port "consul_dns" {
-        to     = "${local.consulenv.CONSUL_PORT_DNS}"
+        to = "${local.consulenv.CONSUL_PORT_DNS}"
       }
       port "consul_grpc" {
-        to     = "${local.consulenv.CONSUL_PORT_GRPC}"
+        to = "${local.consulenv.CONSUL_PORT_GRPC}"
       }
       port "consul_serf_lan" {
-        to     = "${local.consulenv.CONSUL_PORT_SERF_LAN}"
+        to = "${local.consulenv.CONSUL_PORT_SERF_LAN}"
       }
       port "consul_serf_wan" {
-        to     = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
+        to = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
       }
       port "consul_server" {
-        to     = "${local.consulenv.CONSUL_PORT_SERVER}"
+        to = "${local.consulenv.CONSUL_PORT_SERVER}"
       }
     }
 
@@ -368,10 +368,11 @@ job "core" {
     }
 
     service {
-      provider = "nomad"
-      tags     = ["consul", "core-consul"]
       address_mode = "host"
-      port = "consul_serf_lan"
+      port         = "consul_serf_lan"
+      provider     = "nomad"
+      tags         = ["core-consul"]
+      task         = "core-consul"
     }
 
     task "core-consul" {
@@ -500,22 +501,22 @@ job "core" {
         to     = "${local.proxyenv.PROXY_PORT_VAULT}"
       }
       port "consul_cunt" {
-        to     = "${local.proxyenv.CONSUL_PORT_CUNT}"
+        to = "${local.proxyenv.CONSUL_PORT_CUNT}"
       }
       port "consul_dns" {
-        to     = "${local.proxyenv.CONSUL_PORT_DNS}"
+        to = "${local.proxyenv.CONSUL_PORT_DNS}"
       }
       port "consul_grpc" {
-        to     = "${local.proxyenv.CONSUL_PORT_GRPC}"
+        to = "${local.proxyenv.CONSUL_PORT_GRPC}"
       }
       port "consul_serf_lan" {
-        to     = "${local.proxyenv.CONSUL_PORT_SERF_LAN}"
+        to = "${local.proxyenv.CONSUL_PORT_SERF_LAN}"
       }
       port "consul_serf_wan" {
-        to     = "${local.proxyenv.CONSUL_PORT_SERF_WAN}"
+        to = "${local.proxyenv.CONSUL_PORT_SERF_WAN}"
       }
       port "consul_server" {
-        to     = "${local.proxyenv.CONSUL_PORT_SERVER}"
+        to = "${local.proxyenv.CONSUL_PORT_SERVER}"
       }
     } # end network
 
@@ -651,7 +652,7 @@ job "core" {
         CONSUL_HTTP_TOKEN    = "${local.proxyenv.CONSUL_HTTP_TOKEN}"
         CONSUL_NODE_PREFIX   = "${local.proxyenv.CONSUL_NODE_PREFIX}"
         CONSUL_PID_FILE      = "${local.proxyenv.CONSUL_PID_FILE}"
-        CONSUL_PORT_CUNT      = "${NOMAD_PORT_consul_cunt}"
+        CONSUL_PORT_CUNT     = "${NOMAD_PORT_consul_cunt}"
         CONSUL_PORT_DNS      = "${NOMAD_PORT_consul_dns}"
         CONSUL_PORT_GRPC     = "${NOMAD_PORT_consul_grpc}"
         CONSUL_PORT_SERF_LAN = "${NOMAD_PORT_consul_serf_lan}"
@@ -686,10 +687,10 @@ job "core" {
       template {
         change_mode = "restart"
         destination = "local/nomad.env"
-        env = true
-        uid = "${local.proxyenv.CONSUL_UID}"
-        gid = "${local.proxyenv.CONSUL_GID}"
-        data = <<EOH
+        env         = true
+        uid         = "${local.proxyenv.CONSUL_UID}"
+        gid         = "${local.proxyenv.CONSUL_GID}"
+        data        = <<EOH
             {{- range nomadService "core-consul" }}
             CONSUL_SERVER = {{ .Address }}:{{.Port}}
 
