@@ -123,29 +123,53 @@ variable "services" {
         target = string
       }))
     })
-    // core-vault = object({
-    //   cap_add        = list(string)
-    //   entrypoint     = list(string)
-    //   image          = string
-    //   environment = object({
-    //     PROJECT_HOSTNAME = string
-    //     PROJECT_NAME     = string
-    //   })
-    //   ports = list(object({
-    //     mode      = string
-    //     published = string
-    //     protocol  = string
-    //     target    = number
-    //   }))
-    //   volumes = list(object({
-    //     type   = string
-    //     source = string
-    //     target = string
-    //     bind = object({
-    //       create_host_path = bool
-    //     })
-    //   }))
-    // })
+
+    core-vault = object({
+      cap_add    = list(string)
+      entrypoint = list(string)
+      image      = string
+      environment = object({
+        CONSUL_ADDR_BIND     = string
+        CONSUL_ADDR_BIND_LAN = string
+        CONSUL_ADDR_BIND_WAN = string
+        CONSUL_ADDR_CLIENT   = string
+        CONSUL_ALT_DOMAIN    = string
+        CONSUL_CACERT        = string
+        CONSUL_CLIENT_CERT   = string
+        CONSUL_CLIENT_KEY    = string
+        CONSUL_DIR_BASE      = string
+        CONSUL_DIR_CONFIG    = string
+        CONSUL_DIR_DATA      = string
+        CONSUL_GID           = string
+        CONSUL_HTTP_TOKEN    = string
+        CONSUL_NODE_PREFIX   = string
+        CONSUL_PID_FILE      = string
+        CONSUL_PORT_HOST     = string
+        CONSUL_PORT_CUNT     = string
+        CONSUL_PORT_DNS      = string
+        CONSUL_PORT_GRPC     = string
+        CONSUL_PORT_SERF_LAN = string
+        CONSUL_PORT_SERF_WAN = string
+        CONSUL_PORT_SERVER   = string
+        CONSUL_UID           = string
+        MESH_HOSTNAME        = string
+        MESH_SERVER_HOSTNAME = string
+      })
+      ports = list(object({
+        // mode      = string
+        // published = string
+        // protocol  = string
+        target = number
+      }))
+      volumes = list(object({
+        type   = string
+        source = string
+        target = string
+        bind = object({
+          create_host_path = bool
+        })
+      }))
+    })
   })
 }
 variable "secrets" {
@@ -304,8 +328,26 @@ locals {
   }
 
   # vault_group
-  // vault    = var.services.core-vault
-  // vaultenv = var.services.core-vault.environment
+  vault    = var.services.core-vault
+  vaultenv = var.services.core-vault.environment
+  vaultkeys = {
+    vault_pub = {
+      target = "/run/secrets/${var.x-mesh-core-vault.target}"
+      source = "${var.secrets.mesh_core_vault.file}"
+    }
+    vault_prv = {
+      target = "/run/secrets/${var.x-mesh-core-vault-privkey.target}"
+      source = "${var.secrets.mesh_core_vault_privkey.file}"
+    }
+    host_fullchain = {
+      target = "/run/secrets/${var.x-nirvai-fullchain.target}"
+      source = "${var.secrets.nirvai_fullchain.file}"
+    }
+    host_prv = {
+      target = "/run/secrets/${var.x-nirvai-privkey.target}"
+      source = "${var.secrets.nirvai_privkey.file}"
+    }
+  }
 }
 
 job "core" {
@@ -319,9 +361,9 @@ job "core" {
     value     = "linux"
   }
 
-  // meta {
-  //   run_uuid = "${uuidv4()}" # turn off in prod
-  // }
+  meta {
+    run_uuid = "${uuidv4()}" # turn off in prod
+  }
 
   # temp disable until we get this shiz figured out
   reschedule {
@@ -340,19 +382,19 @@ job "core" {
         to     = "${local.consulenv.CONSUL_PORT_CUNT}"
       }
       port "consul_dns" {
-        to     = "${local.consulenv.CONSUL_PORT_DNS}"
+        to = "${local.consulenv.CONSUL_PORT_DNS}"
       }
       port "consul_grpc" {
-        to     = "${local.consulenv.CONSUL_PORT_GRPC}"
+        to = "${local.consulenv.CONSUL_PORT_GRPC}"
       }
       port "consul_serf_lan" {
-        to     = "${local.consulenv.CONSUL_PORT_SERF_LAN}"
+        to = "${local.consulenv.CONSUL_PORT_SERF_LAN}"
       }
       port "consul_serf_wan" {
-        to     = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
+        to = "${local.consulenv.CONSUL_PORT_SERF_WAN}"
       }
       port "consul_server" {
-        to     = "${local.consulenv.CONSUL_PORT_SERVER}"
+        to = "${local.consulenv.CONSUL_PORT_SERVER}"
       }
     }
 
@@ -368,10 +410,11 @@ job "core" {
     }
 
     service {
-      provider = "nomad"
-      tags     = ["consul", "core-consul"]
       address_mode = "host"
-      port = "consul_serf_lan"
+      port         = "consul_serf_lan"
+      provider     = "nomad"
+      tags         = ["core-consul"]
+      task         = "core-consul"
     }
 
     task "core-consul" {
@@ -500,22 +543,22 @@ job "core" {
         to     = "${local.proxyenv.PROXY_PORT_VAULT}"
       }
       port "consul_cunt" {
-        to     = "${local.proxyenv.CONSUL_PORT_CUNT}"
+        to = "${local.proxyenv.CONSUL_PORT_CUNT}"
       }
       port "consul_dns" {
-        to     = "${local.proxyenv.CONSUL_PORT_DNS}"
+        to = "${local.proxyenv.CONSUL_PORT_DNS}"
       }
       port "consul_grpc" {
-        to     = "${local.proxyenv.CONSUL_PORT_GRPC}"
+        to = "${local.proxyenv.CONSUL_PORT_GRPC}"
       }
       port "consul_serf_lan" {
-        to     = "${local.proxyenv.CONSUL_PORT_SERF_LAN}"
+        to = "${local.proxyenv.CONSUL_PORT_SERF_LAN}"
       }
       port "consul_serf_wan" {
-        to     = "${local.proxyenv.CONSUL_PORT_SERF_WAN}"
+        to = "${local.proxyenv.CONSUL_PORT_SERF_WAN}"
       }
       port "consul_server" {
-        to     = "${local.proxyenv.CONSUL_PORT_SERVER}"
+        to = "${local.proxyenv.CONSUL_PORT_SERVER}"
       }
     } # end network
 
@@ -528,12 +571,6 @@ job "core" {
       enabled = true
       min     = 1
       max     = 1
-    }
-
-    service {
-      provider = "nomad"
-      tags     = ["proxy", "core-proxy"]
-      task     = "core-proxy"
     }
 
     task "core-proxy" {
@@ -651,7 +688,7 @@ job "core" {
         CONSUL_HTTP_TOKEN    = "${local.proxyenv.CONSUL_HTTP_TOKEN}"
         CONSUL_NODE_PREFIX   = "${local.proxyenv.CONSUL_NODE_PREFIX}"
         CONSUL_PID_FILE      = "${local.proxyenv.CONSUL_PID_FILE}"
-        CONSUL_PORT_CUNT      = "${NOMAD_PORT_consul_cunt}"
+        CONSUL_PORT_CUNT     = "${NOMAD_PORT_consul_cunt}"
         CONSUL_PORT_DNS      = "${NOMAD_PORT_consul_dns}"
         CONSUL_PORT_GRPC     = "${NOMAD_PORT_consul_grpc}"
         CONSUL_PORT_SERF_LAN = "${NOMAD_PORT_consul_serf_lan}"
@@ -686,13 +723,12 @@ job "core" {
       template {
         change_mode = "restart"
         destination = "local/nomad.env"
-        env = true
-        uid = "${local.proxyenv.CONSUL_UID}"
-        gid = "${local.proxyenv.CONSUL_GID}"
-        data = <<EOH
+        env         = true
+        uid         = "${local.proxyenv.CONSUL_UID}"
+        gid         = "${local.proxyenv.CONSUL_GID}"
+        data        = <<EOH
             {{- range nomadService "core-consul" }}
             CONSUL_SERVER = {{ .Address }}:{{.Port}}
-
             {{- end }}
         EOH
       }
